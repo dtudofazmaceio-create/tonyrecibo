@@ -1,28 +1,26 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tony Fumê - Sistema de Recibos</title>
+    <title>Tony Fumê - Sistema de Recibos & Orçamentos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
             --cor-principal: #000;
             --cor-secundaria: #fff;
             --cor-destaque: #e70000;
+            --cor-orcamento: #1a3a6b;
+            --cor-financeiro: #0a6640;
+            --cor-financeiro-light: #e8f5ee;
             --fonte: 'Arial', sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: var(--fonte);
-            background-color: var(--cor-secundaria);
+            background-color: #f0f0f0;
             color: var(--cor-principal);
             line-height: 1.6;
         }
@@ -36,17 +34,24 @@
             flex-direction: column;
             align-items: center;
             border-bottom: 5px solid var(--cor-destaque);
+            position: relative;
+            overflow: hidden;
         }
 
-        .logo-container {
-            margin-bottom: 10px;
+        #header-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        #logo {
-            max-width: 200px;
-            height: auto;
-        }
-        
+        header > * { position: relative; z-index: 1; }
+
+        .logo-container { margin-bottom: 10px; }
+        #logo { max-width: 200px; height: auto; }
+
         h1 {
             font-size: 2em;
             font-weight: bold;
@@ -74,24 +79,28 @@
             transition: background-color 0.3s ease;
         }
 
-        .header-buttons button:hover {
-            background-color: #d10000;
+        .header-buttons button:hover { background-color: #d10000; }
+        
+        .header-buttons button.btn-orcamento {
+            background-color: var(--cor-orcamento);
         }
+        .header-buttons button.btn-orcamento:hover { background-color: #122c54; }
 
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
+        .header-buttons button.btn-financeiro {
+            background-color: var(--cor-financeiro);
         }
+        .header-buttons button.btn-financeiro:hover { background-color: #074d2f; }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
 
         section {
             background-color: var(--cor-secundaria);
             padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        
+
         h2 {
             font-size: 1.5em;
             margin-bottom: 15px;
@@ -102,7 +111,7 @@
 
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
         }
 
@@ -112,112 +121,79 @@
             padding: 20px;
             border-radius: 8px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .card h3 {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-        }
-        .card p {
-            font-size: 2em;
-            font-weight: bold;
-        }
+        .card.card-orcamento { background-color: var(--cor-orcamento); }
+        .card.card-financeiro { background-color: var(--cor-financeiro); }
+        .card h3 { font-size: 1.1em; margin-bottom: 10px; }
+        .card p { font-size: 1.8em; font-weight: bold; }
+        .card small { font-size: 0.7em; opacity: 0.8; display:block; margin-top:4px; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        thead tr {
-            background-color: #f2f2f2;
-            color: var(--cor-principal);
-        }
-        
-        tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #ddd; font-size: 0.9em; }
+        thead tr { background-color: #f2f2f2; color: var(--cor-principal); }
+        tbody tr:nth-child(even) { background-color: #f9f9f9; }
 
         .btn-acao {
             background-color: transparent;
             border: none;
             cursor: pointer;
-            font-size: 1.2em;
+            font-size: 1.1em;
             color: var(--cor-principal);
-            margin-right: 10px;
+            margin-right: 8px;
         }
-        .btn-acao:hover {
-            color: var(--cor-destaque);
-        }
+        .btn-acao:hover { color: var(--cor-destaque); }
 
         .modal {
             display: none;
             position: fixed;
             z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            overflow-y: auto;
+            background-color: rgba(0,0,0,0.5);
         }
 
         .modal-content {
             background-color: var(--cor-secundaria);
-            margin: 10% auto;
+            margin: 5% auto;
             padding: 30px;
             border-radius: 10px;
             width: 90%;
-            max-width: 600px;
+            max-width: 650px;
             position: relative;
-            animation-name: animatetop;
-            animation-duration: 0.4s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: animatetop 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
-        
+
+        .modal-content.modal-wide { max-width: 900px; }
+        .modal-content.modal-financeiro { max-width: 960px; }
+
         .close-btn {
             color: #aaa;
             float: right;
             font-size: 28px;
             font-weight: bold;
-        }
-
-        .close-btn:hover,
-        .close-btn:focus {
-            color: var(--cor-destaque);
-            text-decoration: none;
             cursor: pointer;
+            line-height: 1;
         }
+        .close-btn:hover { color: var(--cor-destaque); }
 
         @keyframes animatetop {
-            from {top:-300px; opacity:0}
-            to {top:0; opacity:1}
-        }
-        
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            from { top: -50px; opacity: 0; }
+            to { top: 0; opacity: 1; }
         }
 
-        form label {
-            font-weight: bold;
-            color: var(--cor-principal);
-        }
+        form { display: flex; flex-direction: column; gap: 12px; }
+        form label { font-weight: bold; color: var(--cor-principal); font-size: 0.9em; }
 
         form input, form textarea, form select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            font-size: 1em;
+            font-size: 0.95em;
             outline-color: var(--cor-destaque);
         }
 
@@ -231,12 +207,11 @@
             font-weight: bold;
             transition: background-color 0.3s ease;
         }
+        form button:hover { background-color: #d10000; }
 
-        form button:hover {
-            background-color: #d10000;
-        }
-        
-        /* Estilo do recibo */
+        /* =====================
+           RECIBO STYLES
+           ===================== */
         #recibo-content {
             padding: 15px;
             border: 1px solid var(--cor-destaque);
@@ -245,79 +220,34 @@
             background-color: var(--cor-secundaria);
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
-        
-        .recibo-header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding: 20px 0 5px 0;
+            overflow: hidden;
         }
 
-        .recibo-header img {
-            margin-top: -10px;
-            max-width: 120px;
-            margin-bottom: 5px;
+        .recibo-bg-img {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.08;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        .recibo-header h3 {
-            color: var(--cor-principal);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 1.2em;
-        }
-        
-        /* Novo estilo para o corpo do recibo com caixas */
-        .recibo-body {
-            padding: 15px;
-            border-bottom: 1px dashed #ccc;
-            margin-bottom: 15px;
-        }
-        
-        .recibo-info-grid {
-            display: grid;
-            gap: 10px;
-            grid-template-columns: 1fr;
-        }
-        
-        .recibo-info-box {
-            border: 1px solid #ccc;
-            padding: 8px 12px;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        
-        .recibo-info-box h4 {
-            font-size: 0.8em;
-            color: #555;
-            margin-bottom: 3px;
-        }
-        
-        .recibo-info-box p {
-            font-size: 0.9em;
-            font-weight: bold;
-            color: var(--cor-principal);
-        }
-        
-        .recibo-assinatura {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 10px;
-        }
-        
-        .recibo-assinatura .linha-assinatura {
-            border-top: 1px solid var(--cor-destaque);
-            display: inline-block;
-            width: 250px;
-            margin-bottom: 5px;
-        }
-        
-        .recibo-assinatura p {
-            font-size: 0.9em;
-            color: var(--cor-principal);
-            margin-top: 5px;
-        }
+        .recibo-content-inner { position: relative; z-index: 1; }
 
-        /* Estilo do rodapé do recibo */
+        .recibo-header { text-align: center; margin-bottom: 15px; padding: 20px 0 5px 0; }
+        .recibo-header img { max-width: 120px; margin-bottom: 5px; }
+        .recibo-header h3 { color: var(--cor-principal); text-transform: uppercase; letter-spacing: 1px; font-size: 1.2em; }
+
+        .recibo-body { padding: 15px; border-bottom: 1px dashed #ccc; margin-bottom: 15px; }
+        .recibo-info-grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
+        .recibo-info-box { border: 1px solid #ccc; padding: 8px 12px; border-radius: 5px; background-color: #f9f9f9; }
+        .recibo-info-box h4 { font-size: 0.8em; color: #555; margin-bottom: 3px; }
+        .recibo-info-box p { font-size: 0.9em; font-weight: bold; color: var(--cor-principal); }
+
+        .recibo-assinatura { text-align: center; margin-top: 20px; padding-top: 10px; }
+        .recibo-assinatura .linha-assinatura { border-top: 1px solid var(--cor-destaque); display: inline-block; width: 250px; margin-bottom: 5px; }
+        .recibo-assinatura p { font-size: 0.9em; color: var(--cor-principal); margin-top: 5px; }
+
         .recibo-footer {
             background-color: var(--cor-principal);
             color: var(--cor-secundaria);
@@ -326,124 +256,559 @@
             text-align: center;
             margin-top: 15px;
         }
-        
-        .recibo-footer p {
-            margin: 3px 0;
-            font-size: 0.8em;
+        .recibo-footer p { margin: 3px 0; font-size: 0.8em; }
+        .recibo-footer .contato-container { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
+        .recibo-footer .contato-item { display: flex; align-items: center; gap: 5px; }
+
+        /* ============================================
+           ORÇAMENTO STYLES
+           ============================================ */
+        #orcamento-preview {
+            background: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #222;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 30px 35px;
+            border: 1px solid #ccc;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .recibo-footer .contato-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 5px;
+
+        .orc-bg-img {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
         }
-        
-        .recibo-footer .contato-item {
+
+        .orc-inner { position: relative; z-index: 1; }
+
+        .orc-header {
             display: flex;
             align-items: center;
-            gap: 5px;
-        }
-        
-        .recibo-footer .contato-item i {
-            font-size: 0.9em;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
 
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #modal-view-recibo, #modal-view-recibo * {
-                visibility: visible;
-                display: block;
-            }
-            #modal-view-recibo {
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
-            #modal-view-recibo .modal-content {
-                width: 21cm;
-                margin: 0;
-                padding: 1cm;
-                box-shadow: none;
-                background-color: #fff;
-            }
-            #btn-download-pdf, .close-btn {
-                display: none;
-            }
-            .recibo-footer {
-                background-color: var(--cor-principal) !important;
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
-            }
-            #recibo-content {
-                background-color: #fff !important;
-            }
-            #recibo-content img[src] {
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
-            }
+        .orc-logo-area img {
+            max-height: 70px;
+            max-width: 180px;
         }
-        
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.5em;
-            }
-            .header-buttons button {
-                width: 100%;
-            }
+
+        .orc-empresa-nome { text-align: right; }
+
+        .orc-empresa-nome .nome-grande {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--cor-orcamento);
+            letter-spacing: 1px;
+            line-height: 1;
         }
+
+        .orc-empresa-nome .subtitulo {
+            font-size: 13px;
+            color: #555;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .orc-intro {
+            text-align: justify;
+            margin-bottom: 15px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .orc-solicitante { margin-bottom: 15px; font-size: 13px; }
+        .orc-solicitante p { margin: 2px 0; }
+
+        .orc-table-wrapper { border: 1px solid #333; margin-bottom: 15px; }
+
+        .orc-table-title {
+            background-color: var(--cor-orcamento);
+            color: #fff;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 2px;
+            padding: 10px;
+        }
+
+        .orc-table { width: 100%; border-collapse: collapse; }
+        .orc-table thead tr { background-color: #fff; }
+        .orc-table th { border: 1px solid #ccc; padding: 8px 12px; font-size: 12px; font-weight: bold; color: #222; text-align: left; }
+        .orc-table th.col-img { width: 70px; text-align: center; }
+        .orc-table th.col-garantia { width: 90px; text-align: center; }
+        .orc-table th.col-valor { width: 120px; text-align: right; }
+        .orc-table td { border: 1px solid #ddd; padding: 10px 12px; vertical-align: middle; font-size: 12px; }
+        .orc-table td.col-img { text-align: center; }
+        .orc-table td.col-img img { max-width: 55px; max-height: 50px; object-fit: contain; }
+        .orc-table td.col-garantia { text-align: center; }
+        .orc-table td.col-valor { text-align: right; font-weight: bold; }
+
+        .orc-table .row-total td {
+            background-color: #e8e8e8;
+            font-weight: bold;
+            text-align: center;
+            font-size: 13px;
+            border-top: 2px solid #333;
+            padding: 10px;
+        }
+
+        .orc-obs { font-size: 12px; margin-bottom: 12px; line-height: 1.6; }
+        .orc-pagamento { font-size: 12px; margin-bottom: 20px; line-height: 1.8; }
+        .orc-pagamento strong { font-weight: bold; display: block; margin-bottom: 4px; }
+        .orc-footer-loc { text-align: right; font-size: 12px; margin-bottom: 30px; }
+        .orc-assinatura { margin-top: 10px; }
+        .orc-assinatura p { font-size: 12px; margin: 2px 0; }
+        .orc-assinatura .linha-ass { border-top: 1px solid #333; width: 250px; margin: 30px 0 5px 0; }
+
+        /* Modal orcamento form */
+        .orcamento-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .orcamento-form-grid .full { grid-column: 1 / -1; }
+
+        .itens-orcamento { margin-top: 10px; }
+
+        .item-orcamento-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 80px 110px 36px;
+            gap: 6px;
+            align-items: start;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .item-orcamento-row input, .item-orcamento-row textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .item-orcamento-row textarea { resize: vertical; min-height: 55px; }
+
+        .btn-remover-item {
+            background: #e70000; color: #fff; border: none; border-radius: 4px;
+            cursor: pointer; padding: 6px 8px; font-size: 0.9em; align-self: flex-start;
+        }
+        .btn-remover-item:hover { background: #b80000; }
+
+        .btn-add-item { background-color: var(--cor-orcamento) !important; }
+        .btn-add-item:hover { background-color: #122c54 !important; }
+
+        .item-img-preview {
+            width: 55px; height: 50px; object-fit: contain; display: block;
+            margin-top: 4px; border: 1px solid #eee; border-radius: 4px;
+        }
+
+        .img-upload-label {
+            display: block; font-size: 0.75em; color: #666; cursor: pointer;
+            text-align: center; padding: 4px; background: #eee;
+            border-radius: 4px; border: 1px dashed #bbb;
+        }
+        .img-upload-label:hover { background: #ddd; }
+
+        .btn-salvar-orcamento { background-color: var(--cor-orcamento) !important; }
+        .btn-salvar-orcamento:hover { background-color: #122c54 !important; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 0; margin-bottom: 0; }
+
+        .tab-btn {
+            padding: 10px 22px; border: none; border-bottom: 3px solid transparent;
+            background: #f0f0f0; cursor: pointer; font-weight: bold; font-size: 0.95em;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active { background: #fff; border-bottom: 3px solid var(--cor-destaque); color: var(--cor-destaque); }
+        .tab-btn.active-blue { border-bottom-color: var(--cor-orcamento); color: var(--cor-orcamento); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .badge {
+            display: inline-block; background: var(--cor-orcamento); color: #fff;
+            border-radius: 10px; font-size: 0.75em; padding: 1px 8px;
+            margin-left: 6px; vertical-align: middle;
+        }
+
+        #btn-download-pdf, #btn-download-orc-pdf {
+            background-color: var(--cor-destaque); color: #fff; border: none;
+            padding: 10px 22px; border-radius: 5px; cursor: pointer; font-weight: bold;
+            font-size: 0.95em; transition: background-color 0.3s; margin-top: 10px;
+        }
+        #btn-download-pdf:hover, #btn-download-orc-pdf:hover { background-color: #d10000; }
 
         footer {
-            text-align: center;
-            padding: 20px;
-            background-color: var(--cor-principal);
-            color: var(--cor-secundaria);
-            margin-top: 20px;
+            text-align: center; padding: 20px; background-color: var(--cor-principal);
+            color: var(--cor-secundaria); margin-top: 20px;
             border-top: 5px solid var(--cor-destaque);
         }
 
-        #loading-message {
+        #loading-message { text-align: center; color: #555; margin-top: 10px; font-style: italic; }
+
+        /* ============================================
+           PAINEL FINANCEIRO
+           ============================================ */
+        .fin-section-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--cor-financeiro);
+            border-bottom: 2px solid var(--cor-financeiro);
+            padding-bottom: 6px;
+            margin: 20px 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fin-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .fin-card {
+            padding: 16px;
+            border-radius: 10px;
             text-align: center;
-            color: #555;
-            margin-top: 10px;
-            font-style: italic;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid transparent;
+        }
+
+        .fin-card.verde { background: #e8f5ee; border-color: #b2dfca; }
+        .fin-card.azul  { background: #e8f0fb; border-color: #b3c7f0; }
+        .fin-card.laranja { background: #fff4e5; border-color: #f5c67b; }
+        .fin-card.vermelho { background: #fdeaea; border-color: #f5b3b3; }
+        .fin-card.roxo { background: #f3eeff; border-color: #c5a9f5; }
+        .fin-card.cinza { background: #f5f5f5; border-color: #ddd; }
+
+        .fin-card-icon { font-size: 1.6em; margin-bottom: 6px; }
+        .fin-card-label { font-size: 0.78em; color: #555; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .fin-card-value { font-size: 1.4em; font-weight: bold; color: #222; }
+        .fin-card-sub { font-size: 0.72em; color: #777; margin-top: 3px; }
+
+        .fin-barra-container {
+            background: #eee;
+            border-radius: 20px;
+            height: 14px;
+            overflow: hidden;
+            margin: 6px 0 4px 0;
+        }
+
+        .fin-barra {
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.8s ease;
+        }
+
+        .fin-barra.verde { background: linear-gradient(90deg, #1a9955, #0a6640); }
+        .fin-barra.laranja { background: linear-gradient(90deg, #f5a623, #c97d00); }
+        .fin-barra.vermelho { background: linear-gradient(90deg, #e74c3c, #b03020); }
+
+        .fin-projecao-box {
+            background: linear-gradient(135deg, #0a6640, #1a7c50);
+            color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .fin-projecao-box h3 { font-size: 1em; margin-bottom: 14px; opacity: 0.9; letter-spacing: 1px; }
+
+        .fin-projecao-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+        .fin-proj-item { text-align: center; }
+        .fin-proj-item .val { font-size: 1.5em; font-weight: bold; }
+        .fin-proj-item .lab { font-size: 0.72em; opacity: 0.8; }
+
+        .fin-alerta {
+            display: flex; align-items: flex-start; gap: 10px;
+            border-radius: 8px; padding: 12px 16px; margin: 10px 0;
+            font-size: 0.88em; line-height: 1.5;
+        }
+        .fin-alerta.info { background: #e8f4ff; border-left: 4px solid #2196F3; color: #0c4a80; }
+        .fin-alerta.sucesso { background: #e8f5ee; border-left: 4px solid #28a745; color: #0a4a20; }
+        .fin-alerta.aviso { background: #fff4e5; border-left: 4px solid #ff9800; color: #7a4400; }
+        .fin-alerta.perigo { background: #fdeaea; border-left: 4px solid #e53935; color: #7a1010; }
+        .fin-alerta i { margin-top: 2px; font-size: 1.1em; }
+
+        .fin-cap-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 14px;
+        }
+
+        .fin-cap-card {
+            border: 2px solid;
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .fin-cap-card.reserva { border-color: #f5a623; background: #fff9ef; }
+        .fin-cap-card.capital { border-color: #1a3a6b; background: #f0f4ff; }
+
+        .fin-cap-card h4 { font-size: 0.95em; font-weight: bold; margin-bottom: 8px; }
+        .fin-cap-card.reserva h4 { color: #c97d00; }
+        .fin-cap-card.capital h4 { color: #1a3a6b; }
+
+        .fin-cap-card p { font-size: 0.82em; color: #444; line-height: 1.6; margin-bottom: 8px; }
+
+        .fin-cap-valor {
+            font-size: 1.6em;
+            font-weight: bold;
+            margin: 4px 0;
+        }
+        .fin-cap-card.reserva .fin-cap-valor { color: #c97d00; }
+        .fin-cap-card.capital .fin-cap-valor { color: #1a3a6b; }
+
+        .fin-cap-progress {
+            background: #eee;
+            border-radius: 20px;
+            height: 10px;
+            overflow: hidden;
+            margin: 8px 0 4px 0;
+        }
+        .fin-cap-progress-bar { height: 100%; border-radius: 20px; }
+        .fin-cap-card.reserva .fin-cap-progress-bar { background: linear-gradient(90deg, #f5a623, #c97d00); }
+        .fin-cap-card.capital .fin-cap-progress-bar { background: linear-gradient(90deg, #1a3a6b, #0d2145); }
+
+        .fin-mes-grafico {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 80px;
+            padding: 0 4px;
+            border-bottom: 2px solid #ddd;
+            margin: 14px 0 6px 0;
+        }
+
+        .fin-barra-mes {
+            flex: 1;
+            border-radius: 4px 4px 0 0;
+            min-width: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            cursor: default;
+            transition: opacity 0.2s;
+            position: relative;
+        }
+
+        .fin-barra-mes:hover { opacity: 0.8; }
+
+        .fin-barra-mes-fill {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .fin-barra-mes-label {
+            font-size: 0.65em;
+            color: #666;
+            margin-top: 5px;
+            white-space: nowrap;
+        }
+
+        .fin-orcamento-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.78em;
+            font-weight: bold;
+        }
+
+        .fin-orcamento-status.pendente { background: #fff4e5; color: #c97d00; border: 1px solid #f5c67b; }
+        .fin-orcamento-status.aceito   { background: #e8f5ee; color: #0a6640; border: 1px solid #b2dfca; }
+        .fin-orcamento-status.recusado { background: #fdeaea; color: #b03020; border: 1px solid #f5b3b3; }
+
+        .fin-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 6px 0;
+        }
+        .fin-slider-container input[type=range] {
+            flex: 1;
+            accent-color: var(--cor-financeiro);
+            height: 6px;
+        }
+        .fin-slider-container span { min-width: 40px; text-align: right; font-weight: bold; font-size: 0.9em; color: var(--cor-financeiro); }
+
+        .fin-orcamento-status-sel {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.82em;
+            cursor: pointer;
+        }
+
+        /* ============================================
+           RESPONSIVIDADE COMPLETA
+           ============================================ */
+
+        /* Tablet */
+        @media (max-width: 900px) {
+            .modal-content.modal-wide,
+            .modal-content.modal-financeiro { max-width: 98vw; }
+            #orcamento-preview { padding: 20px 16px; font-size: 12px; }
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            /* Header */
+            header { padding: 14px 12px; }
+            h1 { font-size: 1.3em; letter-spacing: 1px; }
+            #logo { max-width: 130px; }
+            .header-buttons { flex-direction: column; gap: 8px; width: 100%; }
+            .header-buttons button { width: 100%; padding: 12px 10px; font-size: 0.92em; }
+
+            /* Container */
+            .container { padding: 0 10px; margin: 12px auto; }
+            section { padding: 14px 12px; }
+
+            /* Cards */
+            .card-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .card p { font-size: 1.4em; }
+
+            /* Tabs */
+            .tab-btn { padding: 8px 12px; font-size: 0.85em; }
+
+            /* Tables — scroll horizontal */
+            table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+            th, td { padding: 8px 10px; font-size: 0.82em; }
+
+            /* Modais */
+            .modal-content { margin: 2% auto; padding: 18px 14px; width: 96%; }
+            .modal-content.modal-wide,
+            .modal-content.modal-financeiro { max-width: 100%; width: 96%; margin: 2% auto; }
+
+            /* Forms */
+            .orcamento-form-grid { grid-template-columns: 1fr; }
+            .item-orcamento-row { grid-template-columns: 1fr; gap: 8px; }
+
+            /* Orçamento preview */
+            #orcamento-preview { padding: 14px 10px; font-size: 11px; }
+            .orc-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .orc-empresa-nome { text-align: left; }
+            .orc-empresa-nome .nome-grande { font-size: 20px; }
+            .orc-logo-area img { max-height: 50px; max-width: 130px; }
+
+            /* Recibo */
+            .recibo-assinatura .linha-assinatura { width: 180px; }
+            .recibo-footer .contato-container { flex-direction: column; gap: 5px; }
+
+            /* Painel financeiro */
+            .fin-projecao-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .fin-cap-grid { grid-template-columns: 1fr; }
+            .fin-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .fin-card-value { font-size: 1.1em; }
+            .fin-section-title { font-size: 0.95em; }
+
+            /* Botões de ação nas tabelas */
+            .btn-acao { font-size: 1em; margin-right: 5px; }
+        }
+
+        /* Celular pequeno */
+        @media (max-width: 480px) {
+            h1 { font-size: 1.1em; }
+            .card-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .card p { font-size: 1.2em; }
+            .fin-projecao-grid { grid-template-columns: 1fr; }
+            .fin-cards { grid-template-columns: 1fr 1fr; }
+            .modal-content { padding: 14px 10px; }
+            #orcamento-preview { font-size: 10px; }
+            .orc-empresa-nome .nome-grande { font-size: 16px; }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #modal-view-recibo, #modal-view-recibo * { visibility: visible; display: block; }
+            #modal-view-recibo { position: absolute; left: 0; top: 0; }
+            #modal-view-recibo .modal-content { width: 21cm; margin: 0; padding: 1cm; box-shadow: none; background: #fff; }
+            #btn-download-pdf, .close-btn { display: none !important; }
+            /* Print para orçamento */
+            #modal-view-orcamento, #modal-view-orcamento * { visibility: visible; }
+            #modal-view-orcamento { position: absolute; left: 0; top: 0; }
+            #modal-view-orcamento .modal-content { width: 21cm; margin: 0; padding: 0.5cm; box-shadow: none; }
+            #btn-download-orc-pdf { display: none !important; }
         }
     </style>
 </head>
 <body>
-    
-    <header id="header">
-        <div class="logo-container">
-            <img id="logo" src="" alt="Logo da Empresa" style="display: none;">
-        </div>
-        <h1>Meus Recibos</h1>
-        <div class="header-buttons">
-            <button id="btn-config">Configurações</button>
-            <button id="btn-add-recibo">Criar Recibo</button>
-            <button id="btn-add-cliente">Cadastrar Cliente</button>
-        </div>
-    </header>
 
-    <main class="container">
-        
-        <section id="sumario">
-            <h2>Resumo Geral</h2>
-            <div class="card-grid">
-                <div class="card">
-                    <h3>Total de Recibos</h3>
-                    <p id="total-recibos">0</p>
-                </div>
-                <div class="card">
-                    <h3>Valor Total</h3>
-                    <p id="valor-total">R$ 0,00</p>
-                </div>
+<header id="header">
+    <img id="header-bg" src="" alt="" style="display:none;">
+    <div class="logo-container">
+        <img id="logo" src="" alt="Logo" style="display:none;">
+    </div>
+    <h1 id="titulo-sistema">Meus Recibos & Orçamentos</h1>
+    <div class="header-buttons">
+        <button id="btn-config"><i class="fas fa-cog"></i> Configurações</button>
+        <button id="btn-add-recibo"><i class="fas fa-file-alt"></i> Criar Recibo</button>
+        <button id="btn-add-cliente"><i class="fas fa-user-plus"></i> Cadastrar Cliente</button>
+        <button class="btn-orcamento" id="btn-add-orcamento"><i class="fas fa-file-invoice-dollar"></i> Criar Orçamento</button>
+        <button class="btn-financeiro" id="btn-painel-financeiro"><i class="fas fa-chart-line"></i> Painel Financeiro</button>
+    </div>
+</header>
+
+<main class="container">
+
+    <section id="sumario">
+        <h2>Resumo Geral</h2>
+        <div class="card-grid">
+            <div class="card">
+                <h3>Total de Recibos</h3>
+                <p id="total-recibos">0</p>
             </div>
-        </section>
+            <div class="card">
+                <h3>Valor Total (Recibos)</h3>
+                <p id="valor-total">R$ 0,00</p>
+            </div>
+            <div class="card card-orcamento">
+                <h3>Total de Orçamentos</h3>
+                <p id="total-orcamentos">0</p>
+            </div>
+            <div class="card card-orcamento">
+                <h3>Valor Total (Orçamentos)</h3>
+                <p id="valor-total-orcamentos">R$ 0,00</p>
+            </div>
+            <div class="card">
+                <h3>Clientes Cadastrados</h3>
+                <p id="total-clientes">0</p>
+            </div>
+            <div class="card card-financeiro" style="cursor:pointer;" onclick="document.getElementById('btn-painel-financeiro').click()">
+                <h3>Receita do Mês</h3>
+                <p id="receita-mes-resumo">R$ 0,00</p>
+                <small>Clique para ver o painel</small>
+            </div>
+        </div>
+    </section>
 
-        <section id="historico">
-            <h2>Histórico de Recibos</h2>
+    <section id="historico">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="trocarTab('tab-recibos', this)">
+                <i class="fas fa-file-alt"></i> Recibos
+            </button>
+            <button class="tab-btn" onclick="trocarTab('tab-orcamentos', this, true)">
+                <i class="fas fa-file-invoice-dollar"></i> Orçamentos
+                <span class="badge" id="badge-orcamentos">0</span>
+            </button>
+        </div>
+
+        <div id="tab-recibos" class="tab-content active" style="padding-top:15px;">
+            <h2 style="margin-top:0;">Histórico de Recibos</h2>
             <table id="tabela-recibos">
                 <thead>
                     <tr>
@@ -454,541 +819,1457 @@
                         <th>Ações</th>
                     </tr>
                 </thead>
-                <tbody>
-                    </tbody>
+                <tbody></tbody>
             </table>
-        </section>
+        </div>
 
-        <section id="clientes">
-            <h2>Clientes Cadastrados</h2>
-            <table id="tabela-clientes">
+        <div id="tab-orcamentos" class="tab-content" style="padding-top:15px;">
+            <h2 style="margin-top:0; color: var(--cor-orcamento); border-color: var(--cor-orcamento);">Histórico de Orçamentos</h2>
+            <table id="tabela-orcamentos">
                 <thead>
                     <tr>
-                        <th>Nome</th>
-                        <th>Telefone</th>
+                        <th>Nº</th>
+                        <th>Empresa/Solicitante</th>
+                        <th>Valor Total</th>
+                        <th>Data</th>
+                        <th>Validade</th>
+                        <th>Status</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
-                <tbody>
-                    </tbody>
+                <tbody></tbody>
             </table>
-        </section>
-
-    </main>
-
-    <div id="modal-config" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>Configurações da Empresa</h2>
-            <form id="form-config">
-                <label for="config-cnpj">CNPJ:</label>
-                <input type="text" id="config-cnpj" required value="13.949.583/0001-32">
-                
-                <label for="config-instagram">Instagram:</label>
-                <input type="text" id="config-instagram" value="@tonyfume">
-                
-                <label for="config-endereco">Endereço:</label>
-                <input type="text" id="config-endereco" value="Avenida Juca Sampaio, 1552, Jacintinho">
-                
-                <label for="config-whatsapp">Whatsapp:</label>
-                <input type="text" id="config-whatsapp" value="(82)99806-9585">
-                
-                <label for="config-logo">Upload da Logo:</label>
-                <input type="file" id="config-logo" accept="image/*">
-                <p id="loading-message" style="display:none;">Processando imagem...</p>
-
-                <label for="config-background">Upload do Plano de Fundo:</label>
-                <input type="file" id="config-background" accept="image/*">
-                
-                <button type="submit">Salvar Configurações</button>
-            </form>
         </div>
-    </div>
+    </section>
 
-    <div id="modal-recibo" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="modal-recibo-titulo">Criar Novo Recibo</h2>
-            <form id="form-recibo">
-                <input type="hidden" id="recibo-id-edicao">
-                
-                <label for="recibo-cliente">Cliente:</label>
-                <select id="recibo-cliente" required>
-                    <option value="" disabled selected>Selecione um cliente</option>
-                    </select>
-                
-                <label for="recibo-servico">Serviço:</label>
-                <textarea id="recibo-servico" rows="3" required></textarea>
-                
-                <label for="recibo-valor">Valor:</label>
-                <input type="number" id="recibo-valor" step="0.01" required>
-                
-                <label for="recibo-data">Data:</label>
-                <input type="date" id="recibo-data" required>
-                
-                <button type="submit" id="btn-salvar-recibo">Baixar Recibo</button>
-            </form>
-        </div>
-    </div>
+    <section id="clientes">
+        <h2>Clientes Cadastrados</h2>
+        <table id="tabela-clientes">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </section>
 
-    <div id="modal-cliente" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="modal-cliente-titulo">Cadastrar Novo Cliente</h2>
-            <form id="form-cliente">
-                <input type="hidden" id="cliente-id-edicao">
-                
-                <label for="cliente-nome">Nome:</label>
-                <input type="text" id="cliente-nome" required>
-                
-                <label for="cliente-telefone">Telefone:</label>
-                <input type="text" id="cliente-telefone">
-                
-                <button type="submit">Salvar Cliente</button>
-            </form>
-        </div>
+</main>
+
+<!-- ============================
+     MODAL CONFIGURAÇÕES
+     ============================ -->
+<div id="modal-config" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Configurações da Empresa</h2>
+        <form id="form-config">
+            <label>Nome da Empresa:</label>
+            <input type="text" id="config-nome-empresa" placeholder="Ex: Tony Fumê">
+
+            <label>CNPJ:</label>
+            <input type="text" id="config-cnpj" value="13.949.583/0001-32">
+
+            <label>Endereço completo:</label>
+            <input type="text" id="config-endereco" value="Avenida Juca Sampaio, 1552, Jacintinho">
+
+            <label>Instagram:</label>
+            <input type="text" id="config-instagram" value="@tonyfume">
+
+            <label>WhatsApp:</label>
+            <input type="text" id="config-whatsapp" value="(82)99806-9585">
+
+            <label>Responsável Legal (para orçamentos):</label>
+            <input type="text" id="config-responsavel" placeholder="Ex: Thiogo Jefferson Nobre Lima">
+
+            <label>Cargo do Responsável:</label>
+            <input type="text" id="config-cargo" placeholder="Ex: Responsável legal por Tony Fumê">
+
+            <label>Chave Pix:</label>
+            <input type="text" id="config-pix" placeholder="CNPJ ou chave pix">
+
+            <label>Upload da Logo: <small style="font-weight:normal;color:#666;">(aplicada em recibos, orçamentos e header)</small></label>
+            <input type="file" id="config-logo" accept="image/*">
+            <div style="display:flex;align-items:center;gap:8px;margin-top:-6px;">
+                <input type="checkbox" id="config-logo-rembg" checked style="width:auto;">
+                <label for="config-logo-rembg" style="font-weight:normal;font-size:0.85em;color:#555;margin:0;">Remover fundo da logo automaticamente</label>
+            </div>
+            <p id="loading-message" style="display:none;">Processando imagem...</p>
+            <div id="logo-preview-container" style="display:none;margin-top:4px;">
+                <img id="logo-preview" style="max-height:80px;border:1px solid #eee;border-radius:6px;background:#f5f5f5;padding:4px;" alt="Preview da logo">
+                <button type="button" id="btn-remover-logo" style="display:block;margin-top:4px;padding:4px 10px;background:#e70000;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:0.8em;">Remover Logo</button>
+            </div>
+
+            <label>Upload do Plano de Fundo: <small style="font-weight:normal;color:#666;">(aplicado em recibos, orçamentos e header)</small></label>
+            <input type="file" id="config-background" accept="image/*">
+
+            <button type="submit">Salvar Configurações</button>
+        </form>
     </div>
-    
-    <div id="modal-view-recibo" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <div id="recibo-content">
+</div>
+
+<!-- ============================
+     MODAL RECIBO
+     ============================ -->
+<div id="modal-recibo" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2 id="modal-recibo-titulo">Criar Novo Recibo</h2>
+        <form id="form-recibo">
+            <input type="hidden" id="recibo-id-edicao">
+            <label>Cliente:</label>
+            <select id="recibo-cliente" required>
+                <option value="" disabled selected>Selecione um cliente</option>
+            </select>
+            <label>Serviço:</label>
+            <textarea id="recibo-servico" rows="3" required></textarea>
+            <label>Valor:</label>
+            <input type="number" id="recibo-valor" step="0.01" required>
+            <label>Data:</label>
+            <input type="date" id="recibo-data" required>
+            <button type="submit" id="btn-salvar-recibo">Baixar Recibo</button>
+        </form>
+    </div>
+</div>
+
+<!-- ============================
+     MODAL CLIENTE
+     ============================ -->
+<div id="modal-cliente" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2 id="modal-cliente-titulo">Cadastrar Novo Cliente</h2>
+        <form id="form-cliente">
+            <input type="hidden" id="cliente-id-edicao">
+            <label>Nome:</label>
+            <input type="text" id="cliente-nome" required>
+            <label>Telefone:</label>
+            <input type="text" id="cliente-telefone">
+            <label>CNPJ (opcional):</label>
+            <input type="text" id="cliente-cnpj" placeholder="Ex: 79.379.491/0182-01">
+            <button type="submit">Salvar Cliente</button>
+        </form>
+    </div>
+</div>
+
+<!-- ============================
+     MODAL VER RECIBO
+     ============================ -->
+<div id="modal-view-recibo" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <div id="recibo-content"></div>
+        <button id="btn-download-pdf"><i class="fas fa-download"></i> Baixar PDF</button>
+    </div>
+</div>
+
+<!-- ============================
+     MODAL CRIAR ORÇAMENTO
+     ============================ -->
+<div id="modal-orcamento" class="modal">
+    <div class="modal-content modal-wide">
+        <span class="close-btn">&times;</span>
+        <h2 id="modal-orcamento-titulo" style="color:var(--cor-orcamento); border-color:var(--cor-orcamento);">
+            <i class="fas fa-file-invoice-dollar"></i> Criar Orçamento
+        </h2>
+        <form id="form-orcamento">
+            <input type="hidden" id="orc-id-edicao">
+
+            <div class="orcamento-form-grid">
+                <div>
+                    <label>Empresa/Solicitante:</label>
+                    <input type="text" id="orc-empresa" placeholder="Nome da empresa cliente" required>
                 </div>
-            <button id="btn-download-pdf">Baixar PDF</button>
-        </div>
+                <div>
+                    <label>CNPJ do Solicitante:</label>
+                    <input type="text" id="orc-cnpj-solicitante" placeholder="Ex: 79.379.491/0182-01">
+                </div>
+                <div>
+                    <label>Data do Orçamento:</label>
+                    <input type="date" id="orc-data" required>
+                </div>
+                <div>
+                    <label>Validade (dias):</label>
+                    <input type="number" id="orc-validade" value="30" min="1">
+                </div>
+                <div class="full">
+                    <label>Observações:</label>
+                    <textarea id="orc-obs" rows="2" placeholder="Ex: Esse orçamento já está incluso tudo, locação de andaimes e todas as outras despesas."></textarea>
+                </div>
+                <div>
+                    <label>Condições de Pagamento:</label>
+                    <input type="text" id="orc-pagamento" placeholder="Ex: transferência ou Pix" value="transferência ou Pix">
+                </div>
+                <div>
+                    <label>Cidade/UF para rodapé:</label>
+                    <input type="text" id="orc-cidade" placeholder="Ex: Maceió (AL)" value="Maceió (AL)">
+                </div>
+            </div>
+
+            <div style="margin-top: 10px;">
+                <label style="font-size:1em; color: var(--cor-orcamento);">Itens do Orçamento</label>
+                <div style="font-size:0.78em; color:#888; margin-bottom:8px;">Foto | Descrição | Garantia | Valor | Remover</div>
+                <div id="itens-container"></div>
+                <button type="button" class="btn-add-item" id="btn-add-item" style="margin-top:8px; padding:8px 16px; font-size:0.9em;">
+                    <i class="fas fa-plus"></i> Adicionar Item
+                </button>
+            </div>
+
+            <button type="submit" class="btn-salvar-orcamento" style="margin-top:16px;">
+                <i class="fas fa-eye"></i> Gerar Pré-visualização
+            </button>
+        </form>
     </div>
+</div>
+
+<!-- ============================
+     MODAL VER ORÇAMENTO
+     ============================ -->
+<div id="modal-view-orcamento" class="modal">
+    <div class="modal-content modal-wide">
+        <span class="close-btn">&times;</span>
+        <div id="orcamento-preview"></div>
+        <button id="btn-download-orc-pdf" style="margin-top:12px;">
+            <i class="fas fa-download"></i> Baixar PDF
+        </button>
+    </div>
+</div>
+
+<!-- ============================
+     MODAL PAINEL FINANCEIRO
+     ============================ -->
+<div id="modal-financeiro" class="modal">
+    <div class="modal-content modal-financeiro">
+        <span class="close-btn">&times;</span>
+        <h2 style="color:var(--cor-financeiro); border-color:var(--cor-financeiro);">
+            <i class="fas fa-chart-line"></i> Painel Financeiro
+        </h2>
+
+        <!-- Resumo do mês atual -->
+        <div class="fin-section-title"><i class="fas fa-calendar-alt"></i> Mês Atual</div>
+        <div class="fin-cards" id="fin-cards-mes"></div>
+
+        <!-- Barra de progresso do mês -->
+        <div id="fin-progresso-mes-container" style="margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.8em; color:#555; margin-bottom:4px;">
+                <span>Progresso do mês</span>
+                <span id="fin-progresso-label">0%</span>
+            </div>
+            <div class="fin-barra-container">
+                <div class="fin-barra verde" id="fin-progresso-barra" style="width:0%"></div>
+            </div>
+            <div style="font-size:0.75em; color:#777; margin-top:3px;" id="fin-progresso-text"></div>
+        </div>
+
+        <!-- Projeção -->
+        <div class="fin-projecao-box" id="fin-projecao-box">
+            <h3><i class="fas fa-chart-bar"></i> PROJEÇÃO PARA O FINAL DO MÊS</h3>
+            <div class="fin-projecao-grid" id="fin-projecao-grid"></div>
+        </div>
+
+        <!-- Alerta de tendência -->
+        <div id="fin-alerta-tendencia"></div>
+
+        <!-- Histórico 3 meses -->
+        <div class="fin-section-title"><i class="fas fa-history"></i> Histórico dos Últimos 3 Meses</div>
+        <div id="fin-grafico-meses"></div>
+
+        <!-- Orçamentos pendentes/aceitos -->
+        <div class="fin-section-title"><i class="fas fa-file-invoice-dollar"></i> Orçamentos em Aberto</div>
+        <div id="fin-orcamentos-abertos">
+            <table style="margin-top:0;">
+                <thead>
+                    <tr>
+                        <th>Nº</th>
+                        <th>Cliente</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="fin-orc-abertos-body"></tbody>
+            </table>
+            <div id="fin-orc-abertos-total" style="margin-top:10px; font-size:0.9em;"></div>
+        </div>
+
+        <!-- Capitalização -->
+        <div class="fin-section-title"><i class="fas fa-piggy-bank"></i> Capitalização & Reserva</div>
+        <div id="fin-alerta-cap"></div>
+
+        <div style="margin-bottom:12px; font-size:0.85em; color:#444; line-height:1.6;">
+            Configure os percentuais que deseja aportar sobre a receita realizada para construir sua reserva de emergência e seu capital de giro.
+        </div>
+
+        <div style="background:#f8f8f8; border-radius:8px; padding:14px; margin-bottom:14px; border:1px solid #e0e0e0;">
+            <div style="margin-bottom:10px;">
+                <label style="font-weight:bold; font-size:0.85em; color:#c97d00;">🛡️ Reserva de Emergência — recomendado: 10-20%</label>
+                <div class="fin-slider-container">
+                    <input type="range" id="slider-reserva" min="0" max="40" value="15" step="1" oninput="atualizarCapitalizacao()">
+                    <span id="val-reserva">15%</span>
+                </div>
+            </div>
+            <div>
+                <label style="font-weight:bold; font-size:0.85em; color:#1a3a6b;">🔄 Capital de Giro — recomendado: 10-30%</label>
+                <div class="fin-slider-container">
+                    <input type="range" id="slider-capital" min="0" max="50" value="20" step="1" oninput="atualizarCapitalizacao()">
+                    <span id="val-capital">20%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="fin-cap-grid" id="fin-cap-grid"></div>
+
+        <div id="fin-cap-conselho" style="margin-top:14px;"></div>
+    </div>
+</div>
+
+<footer>
+    <p>Desenvolvedor - Alex Peixoto - (82)99662-2036</p>
+</footer>
+
+<script src="https://unpkg.com/@danielgatis/rembg-browser"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+// ============================================================
+// ELEMENTOS
+// ============================================================
+const btnConfig = document.getElementById('btn-config');
+const btnAddRecibo = document.getElementById('btn-add-recibo');
+const btnAddCliente = document.getElementById('btn-add-cliente');
+const btnAddOrcamento = document.getElementById('btn-add-orcamento');
+const btnDownloadPdf = document.getElementById('btn-download-pdf');
+const btnDownloadOrcPdf = document.getElementById('btn-download-orc-pdf');
+const btnPainelFinanceiro = document.getElementById('btn-painel-financeiro');
+
+const modalConfig = document.getElementById('modal-config');
+const modalRecibo = document.getElementById('modal-recibo');
+const modalCliente = document.getElementById('modal-cliente');
+const modalViewRecibo = document.getElementById('modal-view-recibo');
+const modalOrcamento = document.getElementById('modal-orcamento');
+const modalViewOrcamento = document.getElementById('modal-view-orcamento');
+const modalFinanceiro = document.getElementById('modal-financeiro');
+
+const formConfig = document.getElementById('form-config');
+const formRecibo = document.getElementById('form-recibo');
+const formCliente = document.getElementById('form-cliente');
+const formOrcamento = document.getElementById('form-orcamento');
+
+const tabelaRecibosBody = document.querySelector('#tabela-recibos tbody');
+const tabelaClientesBody = document.querySelector('#tabela-clientes tbody');
+const tabelaOrcamentosBody = document.querySelector('#tabela-orcamentos tbody');
+const reciboContent = document.getElementById('recibo-content');
+const orcamentoPreview = document.getElementById('orcamento-preview');
+const loadingMessage = document.getElementById('loading-message');
+const itensContainer = document.getElementById('itens-container');
+
+// ============================================================
+// STATE
+// ============================================================
+let rembgInstance = null;
+
+let empresaConfig = JSON.parse(localStorage.getItem('empresaConfig')) || {
+    nomeEmpresa: 'Tony Fumê',
+    cnpj: '13.949.583/0001-32',
+    instagram: '@tonyfume',
+    endereco: 'Avenida Juca Sampaio, 1552, Jacintinho',
+    whatsapp: '(82)99806-9585',
+    responsavel: '',
+    cargo: '',
+    pix: '',
+    logo: null,
+    background: null
+};
+
+let recibos = JSON.parse(localStorage.getItem('recibos')) || [];
+let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+let orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
+
+let proximoReciboId = recibos.length > 0 ? Math.max(...recibos.map(r => r.id)) + 1 : 1;
+let proximoClienteId = clientes.length > 0 ? Math.max(...clientes.map(c => c.id)) + 1 : 1;
+let proximoOrcamentoId = orcamentos.length > 0 ? Math.max(...orcamentos.map(o => o.id)) + 1 : 1;
+
+// ============================================================
+// MODAL HELPERS
+// ============================================================
+function abrirModal(modal) { modal.style.display = 'block'; }
+function fecharModal(modal) { modal.style.display = 'none'; }
+
+window.onclick = (e) => {
+    if (e.target.classList.contains('modal')) fecharModal(e.target);
+};
+
+document.querySelectorAll('.close-btn').forEach(btn => {
+    btn.onclick = () => fecharModal(btn.closest('.modal'));
+});
+
+// ============================================================
+// TABS
+// ============================================================
+function trocarTab(tabId, btn, isOrcamento) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.classList.remove('active-blue'); });
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+    if (isOrcamento) btn.classList.add('active-blue');
+}
+
+// ============================================================
+// FORMATAÇÃO
+// ============================================================
+function formatarMoeda(v) {
+    return parseFloat(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function formatarData(ds) {
+    if (!ds) return '';
+    const [y, m, d] = ds.split('-');
+    return `${d}/${m}/${y}`;
+}
+
+function dataExtenso(ds) {
+    if (!ds) return '';
+    const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const [y, m, d] = ds.split('-');
+    return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
+}
+
+function valorExtenso(v) {
+    const n = parseFloat(v);
+    if (isNaN(n)) return '';
+    const inteiro = Math.floor(n);
+    const centavos = Math.round((n - inteiro) * 100);
     
-    <footer>
-        <p>Desenvolvedor - Alex Peixoto - (82)99662-2036</p>
-    </footer>
+    const unidades = ['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+    const dezenas = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
+    const centenas = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
 
-    <script src="https://unpkg.com/@danielgatis/rembg-browser"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script>
-        const btnConfig = document.getElementById('btn-config');
-        const btnAddRecibo = document.getElementById('btn-add-recibo');
-        const btnAddCliente = document.getElementById('btn-add-cliente');
-        const btnDownloadPdf = document.getElementById('btn-download-pdf');
-        
-        const modalConfig = document.getElementById('modal-config');
-        const modalRecibo = document.getElementById('modal-recibo');
-        const modalCliente = document.getElementById('modal-cliente');
-        const modalViewRecibo = document.getElementById('modal-view-recibo');
-        
-        const closeBtns = document.querySelectorAll('.close-btn');
-        
-        const formConfig = document.getElementById('form-config');
-        const formRecibo = document.getElementById('form-recibo');
-        const formCliente = document.getElementById('form-cliente');
-        
-        const tabelaRecibosBody = document.querySelector('#tabela-recibos tbody');
-        const tabelaClientesBody = document.querySelector('#tabela-clientes tbody');
-        const reciboContent = document.getElementById('recibo-content');
-        const loadingMessage = document.getElementById('loading-message');
-
-        let rembgInstance = null;
-        async function loadRembg() {
-            loadingMessage.textContent = 'Carregando removedor de fundo...';
-            loadingMessage.style.display = 'block';
-            rembgInstance = await rembg.load();
-            loadingMessage.style.display = 'none';
+    function converterMenorQue1000(num) {
+        if (num === 0) return '';
+        if (num === 100) return 'cem';
+        let result = '';
+        const c = Math.floor(num / 100);
+        const resto = num % 100;
+        if (c > 0) result += centenas[c];
+        if (c > 0 && resto > 0) result += ' e ';
+        if (resto > 0 && resto < 20) {
+            result += unidades[resto];
+        } else if (resto >= 20) {
+            const d = Math.floor(resto / 10);
+            const u = resto % 10;
+            result += dezenas[d];
+            if (u > 0) result += ' e ' + unidades[u];
         }
+        return result;
+    }
 
-        let empresaConfig = JSON.parse(localStorage.getItem('empresaConfig')) || {
-            cnpj: '13.949.583/0001-32',
-            instagram: '@tonyfume',
-            endereco: 'Avenida Juca Sampaio, 1552, Jacintinho',
-            whatsapp: '(82)99806-9585',
-            logo: null,
-            background: null
-        };
+    let texto = '';
+    if (inteiro === 0) {
+        texto = 'zero';
+    } else if (inteiro < 1000) {
+        texto = converterMenorQue1000(inteiro) + (inteiro === 1 ? ' real' : ' reais');
+    } else if (inteiro < 1000000) {
+        const mil = Math.floor(inteiro / 1000);
+        const resto = inteiro % 1000;
+        texto = (mil === 1 ? 'mil' : converterMenorQue1000(mil) + ' mil');
+        if (resto > 0) texto += ' e ' + converterMenorQue1000(resto);
+        texto += ' reais';
+    } else {
+        const milh = Math.floor(inteiro / 1000000);
+        const resto = inteiro % 1000000;
+        texto = converterMenorQue1000(milh) + (milh === 1 ? ' milhão' : ' milhões');
+        if (resto > 0) texto += ' e ' + converterMenorQue1000(resto);
+        texto += ' reais';
+    }
 
-        let recibos = JSON.parse(localStorage.getItem('recibos')) || [];
-        let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-        let proximoReciboId = recibos.length > 0 ? Math.max(...recibos.map(r => r.id)) + 1 : 1;
-        let proximoClienteId = clientes.length > 0 ? Math.max(...clientes.map(c => c.id)) + 1 : 1;
-        
-        function abrirModal(modal) {
-            modal.style.display = 'block';
-        }
-        
-        function fecharModal(modal) {
-            modal.style.display = 'none';
-        }
+    if (centavos > 0) texto += ' e ' + (centavos < 20 ? unidades[centavos] : dezenas[Math.floor(centavos/10)] + (centavos%10 > 0 ? ' e ' + unidades[centavos%10] : '')) + (centavos === 1 ? ' centavo' : ' centavos');
 
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                fecharModal(event.target);
-            }
-        }
-        
-        closeBtns.forEach(btn => {
-            btn.onclick = function() {
-                fecharModal(this.closest('.modal'));
-            };
-        });
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
 
-        function formatarMoeda(valor) {
-            return parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
+// ============================================================
+// CONFIGURAÇÕES + LOGO/BG APLICADOS GLOBALMENTE
+// ============================================================
+async function loadRembg() {
+    loadingMessage.textContent = 'Carregando removedor de fundo...';
+    loadingMessage.style.display = 'block';
+    rembgInstance = await rembg.load();
+    loadingMessage.style.display = 'none';
+}
 
-        function carregarConfiguracoes() {
-            document.getElementById('config-cnpj').value = empresaConfig.cnpj || '';
-            document.getElementById('config-instagram').value = empresaConfig.instagram || '';
-            document.getElementById('config-endereco').value = empresaConfig.endereco || '';
-            document.getElementById('config-whatsapp').value = empresaConfig.whatsapp || '';
+function aplicarIdentidadeVisual() {
+    // Header logo
+    const logoEl = document.getElementById('logo');
+    if (empresaConfig.logo) {
+        logoEl.src = empresaConfig.logo;
+        logoEl.style.display = 'block';
+    } else {
+        logoEl.style.display = 'none';
+    }
 
-            const logoElement = document.getElementById('logo');
-            if (empresaConfig.logo) {
-                logoElement.src = empresaConfig.logo;
-                logoElement.style.display = 'block';
-            } else {
-                logoElement.style.display = 'none';
-            }
-        }
-        
-        function salvarConfiguracoes() {
-            empresaConfig.cnpj = document.getElementById('config-cnpj').value;
-            empresaConfig.instagram = document.getElementById('config-instagram').value;
-            empresaConfig.endereco = document.getElementById('config-endereco').value;
-            empresaConfig.whatsapp = document.getElementById('config-whatsapp').value;
-            
+    // Header background
+    const headerBg = document.getElementById('header-bg');
+    if (empresaConfig.background) {
+        headerBg.src = empresaConfig.background;
+        headerBg.style.display = 'block';
+    } else {
+        headerBg.style.display = 'none';
+    }
+
+    // Título do sistema
+    if (empresaConfig.nomeEmpresa) {
+        document.getElementById('titulo-sistema').textContent = empresaConfig.nomeEmpresa;
+    }
+}
+
+function carregarConfiguracoes() {
+    document.getElementById('config-nome-empresa').value = empresaConfig.nomeEmpresa || '';
+    document.getElementById('config-cnpj').value = empresaConfig.cnpj || '';
+    document.getElementById('config-instagram').value = empresaConfig.instagram || '';
+    document.getElementById('config-endereco').value = empresaConfig.endereco || '';
+    document.getElementById('config-whatsapp').value = empresaConfig.whatsapp || '';
+    document.getElementById('config-responsavel').value = empresaConfig.responsavel || '';
+    document.getElementById('config-cargo').value = empresaConfig.cargo || '';
+    document.getElementById('config-pix').value = empresaConfig.pix || '';
+    aplicarIdentidadeVisual();
+    // Mostra preview da logo se já estiver salva
+    if (empresaConfig.logo) atualizarPreviewLogo(empresaConfig.logo);
+}
+
+function salvarConfiguracoes() {
+    empresaConfig.nomeEmpresa = document.getElementById('config-nome-empresa').value;
+    empresaConfig.cnpj = document.getElementById('config-cnpj').value;
+    empresaConfig.instagram = document.getElementById('config-instagram').value;
+    empresaConfig.endereco = document.getElementById('config-endereco').value;
+    empresaConfig.whatsapp = document.getElementById('config-whatsapp').value;
+    empresaConfig.responsavel = document.getElementById('config-responsavel').value;
+    empresaConfig.cargo = document.getElementById('config-cargo').value;
+    empresaConfig.pix = document.getElementById('config-pix').value;
+    localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
+    carregarConfiguracoes();
+    fecharModal(modalConfig);
+}
+
+formConfig.addEventListener('submit', (e) => { e.preventDefault(); salvarConfiguracoes(); });
+
+document.getElementById('config-logo').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const usarRembg = document.getElementById('config-logo-rembg').checked;
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        if (!usarRembg) {
+            // Salva direto sem remover fundo
+            empresaConfig.logo = ev.target.result;
             localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
-            carregarConfiguracoes();
-            fecharModal(modalConfig);
+            aplicarIdentidadeVisual();
+            atualizarPreviewLogo(ev.target.result);
+            return;
         }
 
-        formConfig.addEventListener('submit', (e) => {
-            e.preventDefault();
-            salvarConfiguracoes();
-        });
+        loadingMessage.textContent = 'Removendo fundo da logo...';
+        loadingMessage.style.display = 'block';
 
-        document.getElementById('config-logo').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                loadingMessage.textContent = 'Removendo o fundo da imagem...';
-                loadingMessage.style.display = 'block';
-                
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                    const img = new Image();
-                    img.onload = async () => {
-                        if (!rembgInstance) {
-                            await loadRembg();
-                        }
-                        const output = await rembgInstance.remove(img);
-                        empresaConfig.logo = output.toDataURL('image/png');
-                        loadingMessage.style.display = 'none';
-                        salvarConfiguracoes();
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        document.getElementById('config-background').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    empresaConfig.background = event.target.result;
-                    salvarConfiguracoes();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        function renderizarRecibos() {
-            tabelaRecibosBody.innerHTML = '';
-            let valorTotal = 0;
-            
-            recibos.forEach(recibo => {
-                const cliente = clientes.find(c => c.id === recibo.clienteId);
-                if (!cliente) return;
-                
-                valorTotal += parseFloat(recibo.valor);
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${recibo.id}</td>
-                    <td>${cliente.nome}</td>
-                    <td>${formatarMoeda(recibo.valor)}</td>
-                    <td>${recibo.data}</td>
-                    <td>
-                        <button class="btn-acao" onclick="visualizarRecibo(${recibo.id})"><i class="fas fa-eye"></i></button>
-                        <button class="btn-acao" onclick="editarRecibo(${recibo.id})"><i class="fas fa-edit"></i></button>
-                        <button class="btn-acao" onclick="excluirRecibo(${recibo.id})"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                `;
-                tabelaRecibosBody.appendChild(tr);
-            });
-            
-            document.getElementById('total-recibos').textContent = recibos.length;
-            document.getElementById('valor-total').textContent = formatarMoeda(valorTotal);
-        }
-
-        function renderizarClientes() {
-            tabelaClientesBody.innerHTML = '';
-            const selectClienteRecibo = document.getElementById('recibo-cliente');
-            selectClienteRecibo.innerHTML = '<option value="" disabled selected>Selecione um cliente</option>';
-            
-            clientes.forEach(cliente => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${cliente.nome}</td>
-                    <td>${cliente.telefone}</td>
-                    <td>
-                        <button class="btn-acao" onclick="editarCliente(${cliente.id})"><i class="fas fa-edit"></i></button>
-                        <button class="btn-acao" onclick="excluirCliente(${cliente.id})"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                `;
-                tabelaClientesBody.appendChild(tr);
-                
-                const option = document.createElement('option');
-                option.value = cliente.id;
-                option.textContent = cliente.nome;
-                selectClienteRecibo.appendChild(option);
-            });
-        }
-        
-        function salvarRecibo(recibo) {
-            const index = recibos.findIndex(r => r.id === recibo.id);
-            if (index > -1) {
-                recibos[index] = recibo;
-            } else {
-                recibo.id = proximoReciboId++;
-                recibos.push(recibo);
-            }
-            localStorage.setItem('recibos', JSON.stringify(recibos));
-            renderizarRecibos();
-            return recibo.id;
-        }
-
-        function salvarCliente(cliente) {
-            const index = clientes.findIndex(c => c.id === cliente.id);
-            if (index > -1) {
-                clientes[index] = cliente;
-            } else {
-                cliente.id = proximoClienteId++;
-                clientes.push(cliente);
-            }
-            localStorage.setItem('clientes', JSON.stringify(clientes));
-            renderizarClientes();
-            fecharModal(modalCliente);
-        }
-        
-        formRecibo.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const recibo = {
-                id: document.getElementById('recibo-id-edicao').value ? parseInt(document.getElementById('recibo-id-edicao').value) : null,
-                clienteId: parseInt(document.getElementById('recibo-cliente').value),
-                servico: document.getElementById('recibo-servico').value,
-                valor: parseFloat(document.getElementById('recibo-valor').value),
-                data: document.getElementById('recibo-data').value,
-            };
-            const novoId = salvarRecibo(recibo);
-            e.target.reset();
-            fecharModal(modalRecibo);
-            
-            if (novoId) {
-                visualizarRecibo(novoId, true);
-            }
-        });
-
-        function baixarReciboPdf() {
-            window.jsPDF = window.jspdf.jsPDF;
-            const doc = new jsPDF('p', 'pt', 'a4');
-            const element = document.getElementById('recibo-content');
-            
-            html2canvas(element, { scale: 2 }).then((canvas) => {
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = 595.28;
-                const pageHeight = 841.89;
-                const margin = 20;
-                
-                const imgHeight = (canvas.height * (imgWidth - (2 * margin))) / canvas.width;
-                
-                doc.addImage(imgData, 'PNG', margin, margin, imgWidth - (2 * margin), imgHeight);
-
-                doc.save('recibo.pdf');
-                fecharModal(modalViewRecibo);
-            });
-        }
-        
-        formCliente.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const cliente = {
-                id: document.getElementById('cliente-id-edicao').value ? parseInt(document.getElementById('cliente-id-edicao').value) : null,
-                nome: document.getElementById('cliente-nome').value,
-                telefone: document.getElementById('cliente-telefone').value,
-            };
-            salvarCliente(cliente);
-            e.target.reset();
-        });
-
-        function editarRecibo(id) {
-            const recibo = recibos.find(r => r.id === id);
-            if (!recibo) return;
-            document.getElementById('modal-recibo-titulo').textContent = 'Editar Recibo';
-            document.getElementById('recibo-id-edicao').value = recibo.id;
-            document.getElementById('recibo-cliente').value = recibo.clienteId;
-            document.getElementById('recibo-servico').value = recibo.servico;
-            document.getElementById('recibo-valor').value = recibo.valor;
-            document.getElementById('recibo-data').value = recibo.data;
-            document.getElementById('btn-salvar-recibo').textContent = 'Salvar Recibo';
-            const formReciboSubmitHandler = (e) => {
-                e.preventDefault();
-                const reciboEditado = {
-                    id: parseInt(document.getElementById('recibo-id-edicao').value),
-                    clienteId: parseInt(document.getElementById('recibo-cliente').value),
-                    servico: document.getElementById('recibo-servico').value,
-                    valor: parseFloat(document.getElementById('recibo-valor').value),
-                    data: document.getElementById('recibo-data').value,
-                };
-                salvarRecibo(reciboEditado);
-                fecharModal(modalRecibo);
-                formRecibo.removeEventListener('submit', formReciboSubmitHandler);
-                formRecibo.addEventListener('submit', formReciboDefaultHandler);
-            };
-            const formReciboDefaultHandler = (e) => {
-                e.preventDefault();
-                const recibo = {
-                    id: document.getElementById('recibo-id-edicao').value ? parseInt(document.getElementById('recibo-id-edicao').value) : null,
-                    clienteId: parseInt(document.getElementById('recibo-cliente').value),
-                    servico: document.getElementById('recibo-servico').value,
-                    valor: parseFloat(document.getElementById('recibo-valor').value),
-                    data: document.getElementById('recibo-data').value,
-                };
-                const novoId = salvarRecibo(recibo);
-                e.target.reset();
-                fecharModal(modalRecibo);
-                if (novoId) {
-                    visualizarRecibo(novoId, true);
+        try {
+            const img = new Image();
+            img.onload = async () => {
+                try {
+                    if (!rembgInstance) {
+                        loadingMessage.textContent = 'Carregando removedor de fundo...';
+                        rembgInstance = await rembg.load();
+                    }
+                    const output = await rembgInstance.remove(img);
+                    empresaConfig.logo = output.toDataURL('image/png');
+                } catch (err) {
+                    console.warn('Rembg falhou, salvando logo sem remoção de fundo:', err);
+                    empresaConfig.logo = ev.target.result;
                 }
+                localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
+                loadingMessage.style.display = 'none';
+                aplicarIdentidadeVisual();
+                atualizarPreviewLogo(empresaConfig.logo);
             };
-            formRecibo.removeEventListener('submit', formReciboDefaultHandler);
-            formRecibo.addEventListener('submit', formReciboSubmitHandler);
-            abrirModal(modalRecibo);
+            img.src = ev.target.result;
+        } catch (err) {
+            console.warn('Erro ao processar logo, salvando original:', err);
+            empresaConfig.logo = ev.target.result;
+            localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
+            loadingMessage.style.display = 'none';
+            aplicarIdentidadeVisual();
+            atualizarPreviewLogo(ev.target.result);
         }
-        
-        function excluirRecibo(id) {
-            if (confirm('Tem certeza que deseja excluir este recibo?')) {
-                recibos = recibos.filter(r => r.id !== id);
-                localStorage.setItem('recibos', JSON.stringify(recibos));
-                renderizarRecibos();
+    };
+    reader.readAsDataURL(file);
+});
+
+function atualizarPreviewLogo(src) {
+    const container = document.getElementById('logo-preview-container');
+    const img = document.getElementById('logo-preview');
+    if (src) {
+        img.src = src;
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+document.getElementById('btn-remover-logo').addEventListener('click', () => {
+    empresaConfig.logo = null;
+    localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
+    aplicarIdentidadeVisual();
+    atualizarPreviewLogo(null);
+    document.getElementById('config-logo').value = '';
+});
+
+document.getElementById('config-background').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        empresaConfig.background = ev.target.result;
+        localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
+        aplicarIdentidadeVisual();
+    };
+    reader.readAsDataURL(file);
+});
+
+btnConfig.addEventListener('click', () => { abrirModal(modalConfig); });
+
+// ============================================================
+// CLIENTES
+// ============================================================
+function renderizarClientes() {
+    tabelaClientesBody.innerHTML = '';
+    const selectCliente = document.getElementById('recibo-cliente');
+    selectCliente.innerHTML = '<option value="" disabled selected>Selecione um cliente</option>';
+
+    clientes.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${c.nome}</td><td>${c.telefone || '-'}</td>
+            <td>
+                <button class="btn-acao" onclick="editarCliente(${c.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-acao" onclick="excluirCliente(${c.id})"><i class="fas fa-trash-alt"></i></button>
+            </td>`;
+        tabelaClientesBody.appendChild(tr);
+
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.nome;
+        selectCliente.appendChild(opt);
+    });
+
+    document.getElementById('total-clientes').textContent = clientes.length;
+}
+
+function salvarCliente(c) {
+    const idx = clientes.findIndex(x => x.id === c.id);
+    if (idx > -1) clientes[idx] = c;
+    else { c.id = proximoClienteId++; clientes.push(c); }
+    localStorage.setItem('clientes', JSON.stringify(clientes));
+    renderizarClientes();
+    fecharModal(modalCliente);
+}
+
+function editarCliente(id) {
+    const c = clientes.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('modal-cliente-titulo').textContent = 'Editar Cliente';
+    document.getElementById('cliente-id-edicao').value = c.id;
+    document.getElementById('cliente-nome').value = c.nome;
+    document.getElementById('cliente-telefone').value = c.telefone || '';
+    document.getElementById('cliente-cnpj').value = c.cnpj || '';
+    abrirModal(modalCliente);
+}
+
+function excluirCliente(id) {
+    if (confirm('Excluir este cliente?')) {
+        clientes = clientes.filter(c => c.id !== id);
+        localStorage.setItem('clientes', JSON.stringify(clientes));
+        renderizarClientes();
+    }
+}
+
+formCliente.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const c = {
+        id: document.getElementById('cliente-id-edicao').value ? parseInt(document.getElementById('cliente-id-edicao').value) : null,
+        nome: document.getElementById('cliente-nome').value,
+        telefone: document.getElementById('cliente-telefone').value,
+        cnpj: document.getElementById('cliente-cnpj').value,
+    };
+    salvarCliente(c);
+    e.target.reset();
+});
+
+btnAddCliente.addEventListener('click', () => {
+    document.getElementById('modal-cliente-titulo').textContent = 'Cadastrar Novo Cliente';
+    document.getElementById('cliente-id-edicao').value = '';
+    formCliente.reset();
+    abrirModal(modalCliente);
+});
+
+// ============================================================
+// RECIBOS
+// ============================================================
+function renderizarRecibos() {
+    tabelaRecibosBody.innerHTML = '';
+    let total = 0;
+
+    recibos.forEach(r => {
+        const c = clientes.find(x => x.id === r.clienteId);
+        if (!c) return;
+        total += parseFloat(r.valor);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${r.id}</td>
+            <td>${c.nome}</td>
+            <td>${formatarMoeda(r.valor)}</td>
+            <td>${formatarData(r.data)}</td>
+            <td>
+                <button class="btn-acao" title="Visualizar" onclick="visualizarRecibo(${r.id})"><i class="fas fa-eye"></i></button>
+                <button class="btn-acao" title="Editar" onclick="editarRecibo(${r.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-acao" title="Excluir" onclick="excluirRecibo(${r.id})"><i class="fas fa-trash-alt"></i></button>
+            </td>`;
+        tabelaRecibosBody.appendChild(tr);
+    });
+
+    document.getElementById('total-recibos').textContent = recibos.length;
+    document.getElementById('valor-total').textContent = formatarMoeda(total);
+
+    // atualiza card de receita do mês no resumo
+    const hoje = new Date();
+    const mesMes = hoje.getMonth(), anoMes = hoje.getFullYear();
+    const receitaMes = recibos.filter(r => {
+        const d = new Date(r.data + 'T12:00:00');
+        return d.getMonth() === mesMes && d.getFullYear() === anoMes;
+    }).reduce((s, r) => s + parseFloat(r.valor), 0);
+    document.getElementById('receita-mes-resumo').textContent = formatarMoeda(receitaMes);
+}
+
+function salvarRecibo(r) {
+    const idx = recibos.findIndex(x => x.id === r.id);
+    if (idx > -1) recibos[idx] = r;
+    else { r.id = proximoReciboId++; recibos.push(r); }
+    localStorage.setItem('recibos', JSON.stringify(recibos));
+    renderizarRecibos();
+    return r.id;
+}
+
+function visualizarRecibo(id, baixarAuto = false) {
+    const r = recibos.find(x => x.id === id);
+    const c = clientes.find(x => x.id === r.clienteId);
+    
+    const bgHtml = empresaConfig.background
+        ? `<img class="recibo-bg-img" src="${empresaConfig.background}" alt="">`
+        : '';
+    const logoHtml = empresaConfig.logo
+        ? `<img src="${empresaConfig.logo}" alt="Logo">`
+        : '';
+
+    reciboContent.innerHTML = `
+        ${bgHtml}
+        <div class="recibo-content-inner">
+            <div class="recibo-header">
+                ${logoHtml}
+                <h3>RECIBO DE SERVIÇO</h3>
+            </div>
+            <div class="recibo-body">
+                <div class="recibo-info-grid">
+                    <div class="recibo-info-box"><h4>Recebemos de:</h4><p>${c.nome}</p></div>
+                    <div class="recibo-info-box"><h4>Valor:</h4><p>${formatarMoeda(r.valor)}</p></div>
+                    <div class="recibo-info-box"><h4>Serviço referente:</h4><p>${r.servico}</p></div>
+                    <div class="recibo-info-box"><h4>Data:</h4><p>${formatarData(r.data)}</p></div>
+                </div>
+                <div class="recibo-assinatura">
+                    <div class="linha-assinatura"></div>
+                    <p>Assinatura do Responsável</p>
+                    <p>${empresaConfig.instagram}</p>
+                </div>
+            </div>
+            <div class="recibo-footer">
+                <div class="contato-container">
+                    <div class="contato-item"><i class="fas fa-phone"></i><p>${empresaConfig.whatsapp}</p></div>
+                </div>
+                <p><strong>CNPJ:</strong> ${empresaConfig.cnpj}</p>
+                <p>${empresaConfig.endereco}</p>
+            </div>
+        </div>`;
+    abrirModal(modalViewRecibo);
+    if (baixarAuto) setTimeout(baixarReciboPdf, 500);
+}
+
+function editarRecibo(id) {
+    const r = recibos.find(x => x.id === id);
+    if (!r) return;
+    document.getElementById('modal-recibo-titulo').textContent = 'Editar Recibo';
+    document.getElementById('recibo-id-edicao').value = r.id;
+    document.getElementById('recibo-cliente').value = r.clienteId;
+    document.getElementById('recibo-servico').value = r.servico;
+    document.getElementById('recibo-valor').value = r.valor;
+    document.getElementById('recibo-data').value = r.data;
+    document.getElementById('btn-salvar-recibo').textContent = 'Salvar Recibo';
+    abrirModal(modalRecibo);
+}
+
+function excluirRecibo(id) {
+    if (confirm('Excluir este recibo?')) {
+        recibos = recibos.filter(r => r.id !== id);
+        localStorage.setItem('recibos', JSON.stringify(recibos));
+        renderizarRecibos();
+    }
+}
+
+formRecibo.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const r = {
+        id: document.getElementById('recibo-id-edicao').value ? parseInt(document.getElementById('recibo-id-edicao').value) : null,
+        clienteId: parseInt(document.getElementById('recibo-cliente').value),
+        servico: document.getElementById('recibo-servico').value,
+        valor: parseFloat(document.getElementById('recibo-valor').value),
+        data: document.getElementById('recibo-data').value,
+    };
+    const newId = salvarRecibo(r);
+    e.target.reset();
+    document.getElementById('recibo-id-edicao').value = '';
+    document.getElementById('btn-salvar-recibo').textContent = 'Baixar Recibo';
+    fecharModal(modalRecibo);
+    visualizarRecibo(newId, true);
+});
+
+btnAddRecibo.addEventListener('click', () => {
+    document.getElementById('modal-recibo-titulo').textContent = 'Criar Novo Recibo';
+    document.getElementById('recibo-id-edicao').value = '';
+    document.getElementById('btn-salvar-recibo').textContent = 'Baixar Recibo';
+    formRecibo.reset();
+    abrirModal(modalRecibo);
+});
+
+function baixarReciboPdf() {
+    window.jsPDF = window.jspdf.jsPDF;
+    const doc = new jsPDF('p', 'pt', 'a4');
+    const element = document.getElementById('recibo-content');
+    html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 595.28;
+        const margin = 20;
+        const imgHeight = (canvas.height * (imgWidth - 2 * margin)) / canvas.width;
+        doc.addImage(imgData, 'PNG', margin, margin, imgWidth - 2 * margin, imgHeight);
+        doc.save('recibo.pdf');
+        fecharModal(modalViewRecibo);
+    });
+}
+
+btnDownloadPdf.onclick = baixarReciboPdf;
+
+// ============================================================
+// ORÇAMENTOS
+// ============================================================
+let itensFotos = {};
+
+function adicionarItemOrcamento(item) {
+    const idx = itensContainer.children.length;
+    const div = document.createElement('div');
+    div.className = 'item-orcamento-row';
+    div.dataset.idx = idx;
+
+    div.innerHTML = `
+        <div>
+            <label class="img-upload-label" for="item-foto-${idx}">
+                <i class="fas fa-image"></i><br>Foto
+            </label>
+            <input type="file" id="item-foto-${idx}" accept="image/*" style="display:none;" onchange="carregarFotoItem(this, ${idx})">
+            <img id="item-foto-preview-${idx}" class="item-img-preview" style="display:none;" src="">
+        </div>
+        <textarea placeholder="Descrição do produto/serviço&#10;Ex: Aplicação de película nano cerâmica&#10;Medidas: 8,80m x 2,65m">${item ? item.descricao : ''}</textarea>
+        <input type="text" placeholder="Garantia&#10;Ex: 10 anos" value="${item ? item.garantia : ''}">
+        <input type="text" placeholder="Valor&#10;Ex: R$ 53.900,00" value="${item ? item.valor : ''}">
+        <button type="button" class="btn-remover-item" onclick="removerItem(this)"><i class="fas fa-times"></i></button>`;
+
+    if (item && item.foto) {
+        itensFotos[idx] = item.foto;
+        const img = div.querySelector(`#item-foto-preview-${idx}`);
+        img.src = item.foto;
+        img.style.display = 'block';
+    }
+
+    itensContainer.appendChild(div);
+}
+
+function carregarFotoItem(input, idx) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        itensFotos[idx] = e.target.result;
+        const img = document.getElementById(`item-foto-preview-${idx}`);
+        img.src = e.target.result;
+        img.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function removerItem(btn) { btn.closest('.item-orcamento-row').remove(); }
+
+document.getElementById('btn-add-item').addEventListener('click', () => adicionarItemOrcamento(null));
+
+function coletarItens() {
+    const rows = itensContainer.querySelectorAll('.item-orcamento-row');
+    return Array.from(rows).map((row) => {
+        const origIdx = parseInt(row.dataset.idx);
+        return {
+            descricao: row.querySelector('textarea').value,
+            garantia: row.querySelectorAll('input[type=text]')[0].value,
+            valor: row.querySelectorAll('input[type=text]')[1].value,
+            foto: itensFotos[origIdx] || null
+        };
+    });
+}
+
+function calcularTotalOrcamento(itens) {
+    let total = 0;
+    itens.forEach(item => {
+        const v = item.valor.replace(/[R$\s.]/g, '').replace(',', '.');
+        const n = parseFloat(v);
+        if (!isNaN(n)) total += n;
+    });
+    return total;
+}
+
+function gerarHTMLOrcamento(orc) {
+    const total = calcularTotalOrcamento(orc.itens);
+    const totalFormatado = formatarMoeda(total);
+    const totalExtenso = valorExtenso(total);
+
+    const logoHtml = empresaConfig.logo
+        ? `<img src="${empresaConfig.logo}" alt="Logo">`
+        : `<div style="font-size:11px;color:#999;">(Logo não configurada)</div>`;
+
+    const bgHtml = empresaConfig.background
+        ? `<img class="orc-bg-img" src="${empresaConfig.background}" alt="">`
+        : '';
+
+    const itensHTML = orc.itens.map(item => {
+        const fotoCell = item.foto
+            ? `<img src="${item.foto}" style="max-width:55px;max-height:50px;object-fit:contain;">`
+            : `<div style="width:55px;height:40px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#bbb;">sem foto</div>`;
+        const valorCell = item.valor || 'Não cobramos';
+        return `
+            <tr>
+                <td class="col-img">${fotoCell}</td>
+                <td style="white-space:pre-line;">${item.descricao}</td>
+                <td class="col-garantia">${item.garantia}</td>
+                <td class="col-valor">${valorCell}</td>
+            </tr>`;
+    }).join('');
+
+    const pixInfo = orc.chavePix || empresaConfig.pix || empresaConfig.cnpj;
+    const pagamento = orc.pagamento || 'transferência ou Pix';
+    const nomeEmp = empresaConfig.nomeEmpresa || 'Empresa';
+    const cidade = orc.cidade || 'Maceió (AL)';
+    const dataExtensoStr = dataExtenso(orc.data);
+
+    return `
+    <div id="orcamento-preview">
+        ${bgHtml}
+        <div class="orc-inner">
+        <div class="orc-header">
+            <div class="orc-logo-area">${logoHtml}</div>
+            <div class="orc-empresa-nome">
+                <div class="nome-grande">${nomeEmp.toUpperCase()}</div>
+                <div class="subtitulo">Equipadora</div>
+            </div>
+        </div>
+
+        <p class="orc-intro">
+            A empresa ${nomeEmp}, com sede na ${empresaConfig.endereco}, inscrita no CNPJ sob o nº ${empresaConfig.cnpj},
+            envia o presente orçamento, com validade de até ${orc.validade || 30} dias.
+        </p>
+
+        <div class="orc-solicitante">
+            <p><strong>Empresa/Solicitante:</strong> ${orc.empresa}</p>
+            ${orc.cnpjSolicitante ? `<p><strong>CNPJ:</strong> ${orc.cnpjSolicitante}</p>` : ''}
+        </div>
+
+        <div class="orc-table-wrapper">
+            <div class="orc-table-title">ORÇAMENTO</div>
+            <table class="orc-table">
+                <thead>
+                    <tr>
+                        <th class="col-img"></th>
+                        <th>Descrição dos produtos e serviços</th>
+                        <th class="col-garantia">Garantia</th>
+                        <th class="col-valor">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itensHTML}
+                    <tr class="row-total">
+                        <td colspan="4">
+                            <strong>Total: ${totalFormatado} (${totalExtenso})</strong>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        ${orc.obs ? `<p class="orc-obs"><strong>Observação:</strong> ${orc.obs}</p>` : ''}
+
+        <div class="orc-pagamento">
+            <strong>Condições de pagamento:</strong>
+            Forma de pagamento: ${pagamento}<br>
+            ${pixInfo ? `Chave-pix (CNPJ): ${pixInfo}` : ''}
+        </div>
+
+        <p class="orc-footer-loc">${cidade}, ${dataExtensoStr}.</p>
+
+        <div class="orc-assinatura">
+            <p>Atenciosamente,</p>
+            <div class="linha-ass"></div>
+            ${empresaConfig.responsavel ? `<p><strong>${empresaConfig.responsavel}</strong></p>` : ''}
+            ${empresaConfig.cargo ? `<p>${empresaConfig.cargo}</p>` : ''}
+        </div>
+        </div>
+    </div>`;
+}
+
+function renderizarOrcamentos() {
+    tabelaOrcamentosBody.innerHTML = '';
+    let total = 0;
+
+    orcamentos.forEach(orc => {
+        const t = calcularTotalOrcamento(orc.itens);
+        total += t;
+
+        const statusLabels = { pendente: 'Pendente', aceito: 'Aceito', recusado: 'Recusado' };
+        const statusClass = orc.status || 'pendente';
+        const statusHTML = `<span class="fin-orcamento-status ${statusClass}">${statusLabels[statusClass] || 'Pendente'}</span>`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>#${orc.id}</td>
+            <td>${orc.empresa}</td>
+            <td>${formatarMoeda(t)}</td>
+            <td>${formatarData(orc.data)}</td>
+            <td>${orc.validade || 30} dias</td>
+            <td>${statusHTML}</td>
+            <td>
+                <button class="btn-acao" title="Visualizar" onclick="visualizarOrcamento(${orc.id})" style="color:var(--cor-orcamento)"><i class="fas fa-eye"></i></button>
+                <button class="btn-acao" title="Editar" onclick="editarOrcamento(${orc.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-acao" title="Excluir" onclick="excluirOrcamento(${orc.id})"><i class="fas fa-trash-alt"></i></button>
+            </td>`;
+        tabelaOrcamentosBody.appendChild(tr);
+    });
+
+    document.getElementById('total-orcamentos').textContent = orcamentos.length;
+    document.getElementById('valor-total-orcamentos').textContent = formatarMoeda(total);
+    document.getElementById('badge-orcamentos').textContent = orcamentos.length;
+}
+
+function salvarOrcamento(orc) {
+    const idx = orcamentos.findIndex(x => x.id === orc.id);
+    if (idx > -1) orcamentos[idx] = orc;
+    else { orc.id = proximoOrcamentoId++; orcamentos.push(orc); }
+    localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+    renderizarOrcamentos();
+    return orc.id;
+}
+
+function visualizarOrcamento(id) {
+    const orc = orcamentos.find(x => x.id === id);
+    if (!orc) return;
+    const container = document.getElementById('modal-view-orcamento').querySelector('.modal-content');
+    const existing = container.querySelector('#orcamento-preview');
+    const newHTML = gerarHTMLOrcamento(orc);
+    if (existing) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = newHTML;
+        existing.replaceWith(tmp.firstElementChild);
+    } else {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = newHTML;
+        container.insertBefore(tmp.firstElementChild, document.getElementById('btn-download-orc-pdf'));
+    }
+    abrirModal(modalViewOrcamento);
+}
+
+function editarOrcamento(id) {
+    const orc = orcamentos.find(x => x.id === id);
+    if (!orc) return;
+    preencherFormOrcamento(orc);
+    document.getElementById('modal-orcamento-titulo').innerHTML = '<i class="fas fa-edit"></i> Editar Orçamento';
+    abrirModal(modalOrcamento);
+}
+
+function excluirOrcamento(id) {
+    if (confirm('Excluir este orçamento?')) {
+        orcamentos = orcamentos.filter(o => o.id !== id);
+        localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+        renderizarOrcamentos();
+    }
+}
+
+function alterarStatusOrcamento(id, status) {
+    const orc = orcamentos.find(x => x.id === id);
+    if (!orc) return;
+    orc.status = status;
+    localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
+    renderizarOrcamentos();
+    renderizarPainelFinanceiro();
+}
+
+function preencherFormOrcamento(orc) {
+    document.getElementById('orc-id-edicao').value = orc.id || '';
+    document.getElementById('orc-empresa').value = orc.empresa || '';
+    document.getElementById('orc-cnpj-solicitante').value = orc.cnpjSolicitante || '';
+    document.getElementById('orc-data').value = orc.data || '';
+    document.getElementById('orc-validade').value = orc.validade || 30;
+    document.getElementById('orc-obs').value = orc.obs || '';
+    document.getElementById('orc-pagamento').value = orc.pagamento || 'transferência ou Pix';
+    document.getElementById('orc-cidade').value = orc.cidade || 'Maceió (AL)';
+    itensContainer.innerHTML = '';
+    itensFotos = {};
+    (orc.itens || []).forEach(item => adicionarItemOrcamento(item));
+}
+
+formOrcamento.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const itens = coletarItens();
+    if (itens.length === 0) {
+        alert('Adicione pelo menos um item ao orçamento.');
+        return;
+    }
+    const orc = {
+        id: document.getElementById('orc-id-edicao').value ? parseInt(document.getElementById('orc-id-edicao').value) : null,
+        empresa: document.getElementById('orc-empresa').value,
+        cnpjSolicitante: document.getElementById('orc-cnpj-solicitante').value,
+        data: document.getElementById('orc-data').value,
+        validade: document.getElementById('orc-validade').value,
+        obs: document.getElementById('orc-obs').value,
+        pagamento: document.getElementById('orc-pagamento').value,
+        cidade: document.getElementById('orc-cidade').value,
+        status: 'pendente',
+        itens
+    };
+    const newId = salvarOrcamento(orc);
+    fecharModal(modalOrcamento);
+    visualizarOrcamento(newId);
+});
+
+btnAddOrcamento.addEventListener('click', () => {
+    document.getElementById('modal-orcamento-titulo').innerHTML = '<i class="fas fa-file-invoice-dollar"></i> Criar Orçamento';
+    document.getElementById('orc-id-edicao').value = '';
+    formOrcamento.reset();
+    itensContainer.innerHTML = '';
+    itensFotos = {};
+    document.getElementById('orc-data').value = new Date().toISOString().split('T')[0];
+    adicionarItemOrcamento(null);
+    abrirModal(modalOrcamento);
+});
+
+btnDownloadOrcPdf.addEventListener('click', () => {
+    window.jsPDF = window.jspdf.jsPDF;
+    const doc = new jsPDF('p', 'pt', 'a4');
+    const element = document.getElementById('orcamento-preview');
+    if (!element) return;
+    html2canvas(element, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pageW = 595.28;
+        const pageH = 841.89;
+        const margin = 20;
+        const usableW = pageW - 2 * margin;
+        const imgH = (canvas.height * usableW) / canvas.width;
+
+        if (imgH <= pageH - 2 * margin) {
+            doc.addImage(imgData, 'PNG', margin, margin, usableW, imgH);
+        } else {
+            let y = 0;
+            const pageImgH = pageH - 2 * margin;
+            while (y < imgH) {
+                if (y > 0) doc.addPage();
+                doc.addImage(imgData, 'PNG', margin, margin - y, usableW, imgH);
+                y += pageImgH;
             }
         }
-        
-        function editarCliente(id) {
-            const cliente = clientes.find(c => c.id === id);
-            if (!cliente) return;
-            document.getElementById('modal-cliente-titulo').textContent = 'Editar Cliente';
-            document.getElementById('cliente-id-edicao').value = cliente.id;
-            document.getElementById('cliente-nome').value = cliente.nome;
-            document.getElementById('cliente-telefone').value = cliente.telefone;
-            abrirModal(modalCliente);
-        }
-        
-        function excluirCliente(id) {
-            if (confirm('Tem certeza que deseja excluir este cliente?')) {
-                clientes = clientes.filter(c => c.id !== id);
-                localStorage.setItem('clientes', JSON.stringify(clientes));
-                renderizarClientes();
-            }
-        }
+        doc.save(`orcamento-${Date.now()}.pdf`);
+    });
+});
 
-        function visualizarRecibo(id, baixarAutomaticamente = false) {
-            const recibo = recibos.find(r => r.id === id);
-            const cliente = clientes.find(c => c.id === recibo.clienteId);
-            
-            const conteudo = `
-                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;">
-                    ${empresaConfig.background ? `<img src="${empresaConfig.background}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.1;"/>` : ''}
-                </div>
-                <div class="recibo-header">
-                    ${empresaConfig.logo ? `<img src="${empresaConfig.logo}" alt="Logo da Empresa">` : ''}
-                    <h3>RECIBO DE SERVIÇO</h3>
-                </div>
-                <div class="recibo-body">
-                    <div class="recibo-info-grid">
-                        <div class="recibo-info-box">
-                            <h4>Recebemos de:</h4>
-                            <p>${cliente.nome}</p>
-                        </div>
-                        <div class="recibo-info-box">
-                            <h4>Valor:</h4>
-                            <p>${formatarMoeda(recibo.valor)}</p>
-                        </div>
-                        <div class="recibo-info-box">
-                            <h4>Serviço referente:</h4>
-                            <p>${recibo.servico}</p>
-                        </div>
-                        <div class="recibo-info-box">
-                            <h4>Data:</h4>
-                            <p>${new Date(recibo.data).toLocaleDateString('pt-BR')}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="recibo-assinatura">
-                        <div class="linha-assinatura"></div>
-                        <p>Assinatura do Responsável</p>
-                        <p>${empresaConfig.instagram}</p>
-                    </div>
-                </div>
-                <div class="recibo-footer">
-                    <div class="contato-container">
-                        <div class="contato-item">
-                            <i class="fas fa-whatsapp"></i>
-                            <p>${empresaConfig.whatsapp}</p>
-                        </div>
-                        <div class="contato-item">
-                            <i class="fas fa-envelope"></i>
-                            <p>contato@tonyfume.com.br</p>
-                        </div>
-                    </div>
-                    <p><strong>CNPJ:</strong> ${empresaConfig.cnpj}</p>
-                    <p>${empresaConfig.endereco}</p>
-                </div>
-            `;
-            reciboContent.innerHTML = conteudo;
-            abrirModal(modalViewRecibo);
+// ============================================================
+// PAINEL FINANCEIRO
+// ============================================================
 
-            if (baixarAutomaticamente) {
-                setTimeout(baixarReciboPdf, 500);
-            }
-        }
+function getReceitaMes(ano, mes) {
+    return recibos.filter(r => {
+        const d = new Date(r.data + 'T12:00:00');
+        return d.getFullYear() === ano && d.getMonth() === mes;
+    }).reduce((s, r) => s + parseFloat(r.valor), 0);
+}
 
-        btnDownloadPdf.onclick = baixarReciboPdf;
+function getNomesMes(offset) {
+    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const hoje = new Date();
+    const d = new Date(hoje.getFullYear(), hoje.getMonth() + offset, 1);
+    return { nome: meses[d.getMonth()], mes: d.getMonth(), ano: d.getFullYear() };
+}
 
-        btnConfig.addEventListener('click', () => {
-            abrirModal(modalConfig);
-            if (!rembgInstance) {
-                loadRembg();
-            }
+function renderizarPainelFinanceiro() {
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+    const diaAtual = hoje.getDate();
+    const diasNoMes = new Date(anoAtual, mesAtual + 1, 0).getDate();
+    const percentualMes = diaAtual / diasNoMes;
+
+    // Receita mês atual
+    const receitaMesAtual = getReceitaMes(anoAtual, mesAtual);
+
+    // Receita 3 meses anteriores
+    const m1 = getNomesMes(-1);
+    const m2 = getNomesMes(-2);
+    const m3 = getNomesMes(-3);
+    const r1 = getReceitaMes(m1.ano, m1.mes);
+    const r2 = getReceitaMes(m2.ano, m2.mes);
+    const r3 = getReceitaMes(m3.ano, m3.mes);
+
+    const mediaUltimos3 = (r1 + r2 + r3) / 3;
+    const mediaUltimos3PorDia = mediaUltimos3 / diasNoMes;
+
+    // Projeção: se continuar no ritmo atual
+    const ritmoAtual = diaAtual > 0 ? receitaMesAtual / diaAtual : 0;
+    const projecaoRitmoAtual = ritmoAtual * diasNoMes;
+
+    // Projeção baseada na média histórica
+    const projecaoHistorica = mediaUltimos3PorDia * diasNoMes;
+
+    // Orçamentos pendentes e aceitos
+    const orcPendentes = orcamentos.filter(o => !o.status || o.status === 'pendente');
+    const orcAceitos = orcamentos.filter(o => o.status === 'aceito');
+    const totalOrcPendente = orcPendentes.reduce((s, o) => s + calcularTotalOrcamento(o.itens), 0);
+    const totalOrcAceito = orcAceitos.reduce((s, o) => s + calcularTotalOrcamento(o.itens), 0);
+
+    // Projeção considerando orçamentos aceitos
+    const projecaoComAceitos = receitaMesAtual + totalOrcAceito;
+
+    // --- CARDS MÊS ATUAL ---
+    document.getElementById('fin-cards-mes').innerHTML = `
+        <div class="fin-card verde">
+            <div class="fin-card-icon">💰</div>
+            <div class="fin-card-label">Receita Realizada</div>
+            <div class="fin-card-value">${formatarMoeda(receitaMesAtual)}</div>
+            <div class="fin-card-sub">${recibos.filter(r => { const d = new Date(r.data+'T12:00:00'); return d.getMonth()===mesAtual&&d.getFullYear()===anoAtual; }).length} recibos</div>
+        </div>
+        <div class="fin-card azul">
+            <div class="fin-card-icon">📋</div>
+            <div class="fin-card-label">Orçamentos Aceitos</div>
+            <div class="fin-card-value">${formatarMoeda(totalOrcAceito)}</div>
+            <div class="fin-card-sub">${orcAceitos.length} orçamento(s)</div>
+        </div>
+        <div class="fin-card laranja">
+            <div class="fin-card-icon">⏳</div>
+            <div class="fin-card-label">Orçamentos Pendentes</div>
+            <div class="fin-card-value">${formatarMoeda(totalOrcPendente)}</div>
+            <div class="fin-card-sub">${orcPendentes.length} orçamento(s)</div>
+        </div>
+        <div class="fin-card cinza">
+            <div class="fin-card-icon">📈</div>
+            <div class="fin-card-label">Média Últimos 3 Meses</div>
+            <div class="fin-card-value">${formatarMoeda(mediaUltimos3)}</div>
+            <div class="fin-card-sub">Referência histórica</div>
+        </div>
+    `;
+
+    // --- BARRA PROGRESSO DO MÊS ---
+    const pct = Math.min(100, Math.round((receitaMesAtual / (mediaUltimos3 || 1)) * 100));
+    document.getElementById('fin-progresso-label').textContent = `${pct}% da média histórica`;
+    document.getElementById('fin-progresso-barra').style.width = pct + '%';
+    document.getElementById('fin-progresso-text').textContent =
+        `Dia ${diaAtual} de ${diasNoMes} (${Math.round(percentualMes*100)}% do mês) — ritmo atual: ${formatarMoeda(ritmoAtual)}/dia`;
+
+    // --- PROJEÇÃO ---
+    document.getElementById('fin-projecao-grid').innerHTML = `
+        <div class="fin-proj-item">
+            <div class="lab">Projeção pelo Ritmo Atual</div>
+            <div class="val">${formatarMoeda(projecaoRitmoAtual)}</div>
+        </div>
+        <div class="fin-proj-item">
+            <div class="lab">Projeção Histórica (3 meses)</div>
+            <div class="val">${formatarMoeda(projecaoHistorica)}</div>
+        </div>
+        <div class="fin-proj-item">
+            <div class="lab">Com Orçamentos Aceitos</div>
+            <div class="val">${formatarMoeda(projecaoComAceitos)}</div>
+        </div>
+    `;
+
+    // --- ALERTA TENDÊNCIA ---
+    let alertaHTML = '';
+    if (diaAtual < 5) {
+        alertaHTML = `<div class="fin-alerta info"><i class="fas fa-info-circle"></i><span>Início do mês — a projeção ficará mais precisa conforme mais recibos forem registrados.</span></div>`;
+    } else if (projecaoRitmoAtual >= mediaUltimos3 * 1.1) {
+        alertaHTML = `<div class="fin-alerta sucesso"><i class="fas fa-arrow-trend-up"></i><span><strong>Acima da média!</strong> Você está em um ritmo <strong>${Math.round((projecaoRitmoAtual/mediaUltimos3-1)*100)}% superior</strong> à sua média histórica. Excelente momento para aumentar os aportes na reserva e capital de giro!</span></div>`;
+    } else if (projecaoRitmoAtual < mediaUltimos3 * 0.7) {
+        alertaHTML = `<div class="fin-alerta perigo"><i class="fas fa-exclamation-triangle"></i><span><strong>Atenção:</strong> Ritmo atual está <strong>${Math.round((1-projecaoRitmoAtual/mediaUltimos3)*100)}% abaixo</strong> da média histórica. Considere intensificar as prospecções e acompanhar os orçamentos pendentes.</span></div>`;
+    } else if (projecaoRitmoAtual < mediaUltimos3 * 0.9) {
+        alertaHTML = `<div class="fin-alerta aviso"><i class="fas fa-exclamation-circle"></i><span>Ritmo levemente abaixo do esperado. Há <strong>${orcPendentes.length} orçamento(s) pendente(s)</strong> que podem impulsionar o resultado — acompanhe de perto!</span></div>`;
+    } else {
+        alertaHTML = `<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Você está no ritmo esperado para o mês. Continue assim!</span></div>`;
+    }
+    document.getElementById('fin-alerta-tendencia').innerHTML = alertaHTML;
+
+    // --- GRÁFICO 3 MESES ---
+    const historicoMeses = [m3, m2, m1, { nome: 'Atual', mes: mesAtual, ano: anoAtual }];
+    const valoresMeses = [r3, r2, r1, receitaMesAtual];
+    const maxVal = Math.max(...valoresMeses, 1);
+
+    let grafHTML = '<div class="fin-mes-grafico">';
+    historicoMeses.forEach((m, i) => {
+        const v = valoresMeses[i];
+        const h = Math.max(6, Math.round((v / maxVal) * 70));
+        const cor = i === 3 ? '#0a6640' : '#1a3a6b';
+        grafHTML += `
+            <div class="fin-barra-mes" title="${m.nome}: ${formatarMoeda(v)}">
+                <div style="font-size:0.7em;color:#444;margin-bottom:3px;">${formatarMoeda(v)}</div>
+                <div class="fin-barra-mes-fill" style="height:${h}px; background:${cor};"></div>
+                <div class="fin-barra-mes-label">${m.nome}</div>
+            </div>`;
+    });
+    grafHTML += '</div>';
+    document.getElementById('fin-grafico-meses').innerHTML = grafHTML;
+
+    // --- ORÇAMENTOS EM ABERTO ---
+    const orcAbertos = orcamentos.filter(o => !o.status || o.status === 'pendente' || o.status === 'aceito');
+    const tbody = document.getElementById('fin-orc-abertos-body');
+    tbody.innerHTML = '';
+    if (orcAbertos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Nenhum orçamento em aberto</td></tr>';
+    } else {
+        orcAbertos.forEach(orc => {
+            const t = calcularTotalOrcamento(orc.itens);
+            const s = orc.status || 'pendente';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>#${orc.id}</td>
+                <td>${orc.empresa}</td>
+                <td><strong>${formatarMoeda(t)}</strong></td>
+                <td>${formatarData(orc.data)}</td>
+                <td><span class="fin-orcamento-status ${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span></td>
+                <td>
+                    <select class="fin-orcamento-status-sel" onchange="alterarStatusOrcamento(${orc.id}, this.value)">
+                        <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
+                        <option value="aceito"   ${s==='aceito'?'selected':''}>Aceito</option>
+                        <option value="recusado" ${s==='recusado'?'selected':''}>Recusado</option>
+                    </select>
+                </td>`;
+            tbody.appendChild(tr);
         });
+    }
 
-        btnAddRecibo.addEventListener('click', () => {
-            document.getElementById('modal-recibo-titulo').textContent = 'Criar Novo Recibo';
-            document.getElementById('recibo-id-edicao').value = '';
-            document.getElementById('btn-salvar-recibo').textContent = 'Baixar Recibo';
-            formRecibo.reset();
-            abrirModal(modalRecibo);
-        });
-        btnAddCliente.addEventListener('click', () => {
-            document.getElementById('modal-cliente-titulo').textContent = 'Cadastrar Novo Cliente';
-            document.getElementById('cliente-id-edicao').value = '';
-            formCliente.reset();
-            abrirModal(modalCliente);
-        });
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarConfiguracoes();
-            renderizarClientes();
-            renderizarRecibos();
-        });
+    const totalAberto = orcAbertos.reduce((s, o) => s + calcularTotalOrcamento(o.itens), 0);
+    document.getElementById('fin-orc-abertos-total').innerHTML =
+        `Total em aberto: <strong>${formatarMoeda(totalAberto)}</strong> — Aceitos: <strong style="color:var(--cor-financeiro)">${formatarMoeda(totalOrcAceito)}</strong> — Pendentes: <strong style="color:#c97d00">${formatarMoeda(totalOrcPendente)}</strong>`;
 
-    </script>
+    // --- ALERTA CAPITALIZAÇÃO ---
+    let alertaCapHTML = '';
+    if (receitaMesAtual > 0) {
+        alertaCapHTML = `<div class="fin-alerta sucesso"><i class="fas fa-piggy-bank"></i><span>Com base na sua receita realizada de <strong>${formatarMoeda(receitaMesAtual)}</strong>, confira abaixo os valores sugeridos para aporte em reserva e capital de giro. Ajuste os sliders conforme sua necessidade.</span></div>`;
+    } else {
+        alertaCapHTML = `<div class="fin-alerta info"><i class="fas fa-info-circle"></i><span>Registre recibos de pagamento para receber recomendações personalizadas de capitalização.</span></div>`;
+    }
+    document.getElementById('fin-alerta-cap').innerHTML = alertaCapHTML;
+
+    // Atualiza capitalização
+    atualizarCapitalizacao();
+}
+
+function atualizarCapitalizacao() {
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+    const receitaMesAtual = getReceitaMes(anoAtual, mesAtual);
+
+    const pctReserva = parseInt(document.getElementById('slider-reserva').value);
+    const pctCapital = parseInt(document.getElementById('slider-capital').value);
+
+    document.getElementById('val-reserva').textContent = pctReserva + '%';
+    document.getElementById('val-capital').textContent = pctCapital + '%';
+
+    const valorReserva = receitaMesAtual * pctReserva / 100;
+    const valorCapital = receitaMesAtual * pctCapital / 100;
+    const totalAporte = valorReserva + valorCapital;
+    const restante = receitaMesAtual - totalAporte;
+    const pctTotal = Math.min(100, pctReserva + pctCapital);
+
+    // Dados acumulados salvos
+    let cap = JSON.parse(localStorage.getItem('capitalizacao')) || { reserva: 0, capital: 0 };
+
+    document.getElementById('fin-cap-grid').innerHTML = `
+        <div class="fin-cap-card reserva">
+            <h4>🛡️ Reserva de Emergência</h4>
+            <p>Protege o negócio em meses com baixa receita. Meta recomendada: 3 a 6 meses de custos fixos.</p>
+            <div class="fin-cap-valor">${formatarMoeda(valorReserva)}</div>
+            <div style="font-size:0.78em;color:#777;">Aporte sugerido este mês (${pctReserva}%)</div>
+            <div class="fin-cap-progress">
+                <div class="fin-cap-progress-bar" style="width:${pctReserva}%"></div>
+            </div>
+            <div style="font-size:0.75em;color:#999;">Acumulado salvo: ${formatarMoeda(cap.reserva)}</div>
+            <button onclick="registrarAporte('reserva', ${valorReserva})" style="margin-top:8px;padding:6px 14px;background:#c97d00;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.82em;font-weight:bold;">
+                ✔ Registrar Aporte
+            </button>
+        </div>
+        <div class="fin-cap-card capital">
+            <h4>🔄 Capital de Giro</h4>
+            <p>Garante a continuidade das operações, cobrindo compras, despesas e investimentos em crescimento.</p>
+            <div class="fin-cap-valor">${formatarMoeda(valorCapital)}</div>
+            <div style="font-size:0.78em;color:#777;">Aporte sugerido este mês (${pctCapital}%)</div>
+            <div class="fin-cap-progress">
+                <div class="fin-cap-progress-bar" style="width:${Math.min(100, pctCapital * 2)}%"></div>
+            </div>
+            <div style="font-size:0.75em;color:#999;">Acumulado salvo: ${formatarMoeda(cap.capital)}</div>
+            <button onclick="registrarAporte('capital', ${valorCapital})" style="margin-top:8px;padding:6px 14px;background:#1a3a6b;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.82em;font-weight:bold;">
+                ✔ Registrar Aporte
+            </button>
+        </div>
+    `;
+
+    // Conselho personalizado
+    let conselho = '';
+    if (receitaMesAtual === 0) {
+        conselho = '';
+    } else if (pctTotal > 50) {
+        conselho = `<div class="fin-alerta aviso"><i class="fas fa-exclamation-circle"></i><span>Você está alocando <strong>${pctTotal}%</strong> da receita em aportes. Certifique-se de que o restante (<strong>${formatarMoeda(restante)}</strong>) seja suficiente para cobrir todos os custos operacionais do mês.</span></div>`;
+    } else if (pctTotal < 10 && receitaMesAtual > 0) {
+        conselho = `<div class="fin-alerta aviso"><i class="fas fa-lightbulb"></i><span>Seu percentual de aporte está baixo. Recomendamos pelo menos <strong>20-30%</strong> da receita para construir proteção e capacidade de investimento ao longo do tempo.</span></div>`;
+    } else {
+        conselho = `<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Boa estratégia! Você está destinando <strong>${pctTotal}%</strong> (${formatarMoeda(totalAporte)}) para capitalização, sobrando <strong>${formatarMoeda(restante)}</strong> para operações e retiradas.</span></div>`;
+    }
+    document.getElementById('fin-cap-conselho').innerHTML = conselho;
+}
+
+function registrarAporte(tipo, valor) {
+    let cap = JSON.parse(localStorage.getItem('capitalizacao')) || { reserva: 0, capital: 0 };
+    cap[tipo] = (cap[tipo] || 0) + valor;
+    localStorage.setItem('capitalizacao', JSON.stringify(cap));
+    alert(`Aporte de ${formatarMoeda(valor)} registrado em ${tipo === 'reserva' ? 'Reserva de Emergência' : 'Capital de Giro'}!`);
+    atualizarCapitalizacao();
+}
+
+btnPainelFinanceiro.addEventListener('click', () => {
+    renderizarPainelFinanceiro();
+    abrirModal(modalFinanceiro);
+});
+
+// ============================================================
+// INIT
+// ============================================================
+carregarConfiguracoes();
+renderizarClientes();
+renderizarRecibos();
+renderizarOrcamentos();
+</script>
 </body>
 </html>
