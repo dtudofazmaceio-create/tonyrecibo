@@ -271,21 +271,79 @@
         .modal-sheet::-webkit-scrollbar{display:none;}
         main::-webkit-scrollbar{display:none;}
 
-        /* ========= ESTILOS DO PDF (adaptados ao tema vermelho/preto) ========= */
-        .pdf-wrap{background:white;color:#111;font-family:'Inter',sans-serif;}
-        .pdf-header{background:var(--dark);color:white;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
-        .pdf-logo-text{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:1px;}
-        .pdf-logo-text span{color:var(--red);}
-        .pdf-logo-sub{color:#aaa;font-size:9px;text-transform:uppercase;letter-spacing:2px;}
-        .pdf-body{padding:20px;}
-        .pdf-info-row{font-size:12px;margin:6px 0;}
-        .pdf-table{width:100%;border-collapse:collapse;margin:16px 0;}
-        .pdf-table th{background:var(--dark);color:white;font-size:11px;font-weight:700;padding:8px 6px;text-transform:uppercase;}
-        .pdf-table td{padding:8px 6px;border-bottom:1px solid #ddd;font-size:11px;vertical-align:middle;}
-        .pdf-table td:last-child{text-align:right;font-weight:700;}
-        .pdf-total-row{background:var(--dark);color:white;padding:12px 16px;display:flex;justify-content:space-between;margin-top:16px;}
-        .pdf-footer{background:#f5f5f5;padding:10px 20px;text-align:center;font-size:10px;color:#666;}
-        .pdf-obs{background:#fff8e1;border-left:4px solid var(--orange);padding:10px;margin:16px 0;font-size:11px;}
+        /* ─── LOADING SPINNER (botão PDF) ─── */
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .fa-spin{animation:spin 1s linear infinite;}
+
+        /* ─── WHATSAPP BTN ─── */
+        .btn-wa{background:#25D366;color:#fff;border:none;padding:12px 14px;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+        .btn-wa:active{opacity:.85;}
+
+        /* ─── PDF PRINT HELPERS ─── */
+        #recibo-content,#orc-preview-wrap{font-size:12px;}
+
+        /* ========= ESTILOS DO PDF — PROFISSIONAL ========= */
+        .pdf-wrap{background:#fff;color:#1a1a1a;font-family:'Inter',sans-serif;position:relative;}
+        /* Header PDF */
+        .pdf-header{background:linear-gradient(135deg,#0a0a0a 0%,#1e1e1e 100%);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden;}
+        .pdf-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#e70000,#ff6b6b,#e70000);}
+        .pdf-logo-text{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;letter-spacing:1.5px;}
+        .pdf-logo-text span{color:#e70000;}
+        .pdf-logo-sub{color:#888;font-size:8px;text-transform:uppercase;letter-spacing:3px;margin-top:2px;}
+        .pdf-doc-badge{background:#e70000;color:#fff;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:4px;margin-top:6px;display:inline-block;}
+        .pdf-doc-num{font-size:11px;color:#aaa;margin-top:4px;letter-spacing:.5px;}
+        /* Faixa info empresa */
+        .pdf-company-strip{background:#f8f8f8;border-bottom:1px solid #e0e0e0;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;}
+        .pdf-company-info{font-size:9px;color:#555;line-height:1.7;}
+        .pdf-company-info strong{color:#1a1a1a;font-size:10px;}
+        /* Seção de dados */
+        .pdf-body{padding:18px 24px;}
+        .pdf-section{margin-bottom:16px;}
+        .pdf-section-title{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#e70000;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #e70000;display:flex;align-items:center;gap:5px;}
+        .pdf-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;}
+        .pdf-info-item{background:#fafafa;border-radius:5px;padding:7px 10px;border:1px solid #eeeeee;}
+        .pdf-info-item-full{background:#fafafa;border-radius:5px;padding:7px 10px;border:1px solid #eeeeee;grid-column:1/-1;}
+        .pdf-info-label{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#999;margin-bottom:2px;}
+        .pdf-info-value{font-size:11px;font-weight:600;color:#1a1a1a;}
+        /* Tabela */
+        .pdf-table{width:100%;border-collapse:collapse;margin:0;font-size:10.5px;}
+        .pdf-table thead tr{background:#1a1a1a;}
+        .pdf-table th{color:#fff;font-size:8px;font-weight:700;padding:9px 8px;text-align:left;text-transform:uppercase;letter-spacing:.5px;}
+        .pdf-table th:last-child,.pdf-table td:last-child{text-align:right;}
+        .pdf-table tbody tr:nth-child(even){background:#fafafa;}
+        .pdf-table tbody tr:hover{background:#f0f0f0;}
+        .pdf-table td{padding:9px 8px;border-bottom:1px solid #eeeeee;vertical-align:middle;color:#1a1a1a;}
+        .pdf-table td.ci{width:60px;}
+        .pdf-table td.cg,.pdf-table th.cg{text-align:center;}
+        .pdf-table td.cv,.pdf-table th.cv{text-align:right;}
+        .pdf-table tfoot tr{background:#f0f0f0;}
+        .pdf-table tfoot td{padding:9px 8px;font-weight:700;font-size:11px;border-top:2px solid #1a1a1a;}
+        /* Total bar */
+        .pdf-total-wrap{background:linear-gradient(135deg,#0a0a0a,#1e1e1e);color:#fff;padding:14px 20px;margin-top:12px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
+        .pdf-total-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#aaa;}
+        .pdf-total-value{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;color:#fff;}
+        .pdf-total-acento{color:#e70000;}
+        .pdf-extenso{text-align:center;font-size:9px;color:#777;font-style:italic;margin-top:8px;padding:6px;background:#f9f9f9;border-radius:4px;border:1px dashed #ddd;}
+        /* Observação */
+        .pdf-obs{background:#fffbeb;border-left:3px solid #f59e0b;padding:10px 14px;margin:12px 0;font-size:10px;border-radius:0 5px 5px 0;}
+        .pdf-obs strong{color:#b45309;display:block;margin-bottom:3px;font-size:8px;text-transform:uppercase;letter-spacing:.5px;}
+        /* Assinatura */
+        .pdf-sign-section{display:flex;justify-content:space-between;align-items:flex-end;margin-top:24px;padding-top:16px;border-top:1px dashed #ddd;gap:20px;}
+        .pdf-sign-block{text-align:center;flex:1;}
+        .pdf-sign-line{border-top:1.5px solid #1a1a1a;margin:0 auto 6px;width:80%;}
+        .pdf-sign-name{font-size:10px;font-weight:700;color:#1a1a1a;}
+        .pdf-sign-role{font-size:8px;color:#888;text-transform:uppercase;letter-spacing:.5px;}
+        /* Rodapé */
+        .pdf-footer{background:#f0f0f0;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #ddd;}
+        .pdf-footer-left{font-size:8.5px;color:#666;line-height:1.7;}
+        .pdf-footer-right{font-size:8px;color:#aaa;text-align:right;}
+        .pdf-footer-divider{color:#ccc;margin:0 6px;}
+        /* Validade badge */
+        .pdf-validade-badge{background:#fff3cd;color:#856404;border:1px solid #ffd500;border-radius:99px;font-size:9px;padding:3px 10px;font-weight:700;display:inline-block;}
+        /* PIX row */
+        .pdf-pix-row{background:#e8f5e9;border:1px solid #a5d6a7;border-radius:6px;padding:8px 12px;margin:10px 0;font-size:10px;display:flex;align-items:center;gap:8px;}
+        .pdf-pix-row strong{color:#2e7d32;}
+
     </style>
 </head>
 <body>
@@ -461,6 +519,26 @@
             <label class="form-label">Data</label>
             <input type="date" id="r-data" class="form-control" required>
         </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Forma de Pagamento</label>
+                <select id="r-pagamento" class="form-control">
+                    <option value="Pix">Pix</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Cartão de Débito">Cartão de Débito</option>
+                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                    <option value="Transferência">Transferência</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Garantia (meses)</label>
+                <input type="number" id="r-garantia" class="form-control" placeholder="Ex: 12" value="12" min="0">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Observações</label>
+            <textarea id="r-obs" class="form-control" placeholder="Informações adicionais..."></textarea>
+        </div>
 
         <!-- Container de Itens -->
         <div style="margin-bottom:14px;">
@@ -487,7 +565,10 @@
 <div class="modal-sheet" id="sheet-ver-recibo">
     <div class="sheet-handle"></div>
     <div id="recibo-content"></div>
-    <button class="btn-dl" id="btn-dl-recibo"><i class="fas fa-download"></i> Baixar PDF</button>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn-dl" id="btn-dl-recibo" style="flex:2;"><i class="fas fa-download"></i> Baixar PDF</button>
+        <button class="btn-dl" id="btn-wa-recibo" style="flex:1;background:#25D366;" onclick="compartilharWhatsApp('recibo')"><i class="fab fa-whatsapp"></i> Enviar</button>
+    </div>
     <button type="button" class="btn-block ghost" style="margin-top:8px;" onclick="closeSheet('ver-recibo')">Fechar</button>
 </div>
 
@@ -565,7 +646,10 @@
 <div class="modal-sheet" id="sheet-ver-orcamento">
     <div class="sheet-handle"></div>
     <div id="orc-preview-wrap"></div>
-    <button class="btn-dl" id="btn-dl-orc"><i class="fas fa-download"></i> Baixar PDF</button>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn-dl" id="btn-dl-orc" style="flex:2;"><i class="fas fa-download"></i> Baixar PDF</button>
+        <button class="btn-dl" id="btn-wa-orc" style="flex:1;background:#25D366;" onclick="compartilharWhatsApp('orc')"><i class="fab fa-whatsapp"></i> Enviar</button>
+    </div>
     <button type="button" class="btn-block ghost" style="margin-top:8px;" onclick="closeSheet('ver-orcamento')">Fechar</button>
 </div>
 
@@ -863,7 +947,8 @@ let recibos    = [];
 let clientes   = [];
 let orcamentos = [];
 let materiais  = [];
-let reciboFotos = {}; // Para fotos temporárias
+let reciboFotos = {}; // Para fotos temporárias do recibo
+let itensFotos   = {}; // Para fotos temporárias do orçamento
 
 let currentView = 'dashboard';
 let orcFilter   = 'all';
@@ -1347,6 +1432,9 @@ function openReciboForm(id){
     document.getElementById('r-placa').value='';
     document.getElementById('r-pelicula').value='';
     document.getElementById('r-data').value=today();
+    document.getElementById('r-pagamento').value='Pix';
+    document.getElementById('r-garantia').value='12';
+    document.getElementById('r-obs').value='';
     document.getElementById('recibo-itens-container').innerHTML='';
     reciboFotos = {};
     populateClienteSelect();
@@ -1359,6 +1447,9 @@ function openReciboForm(id){
         document.getElementById('r-placa').value=r.placa||'';
         document.getElementById('r-pelicula').value=r.pelicula||'';
         document.getElementById('r-data').value=r.data;
+        document.getElementById('r-pagamento').value=r.pagamento||'Pix';
+        document.getElementById('r-garantia').value=r.garantia||'12';
+        document.getElementById('r-obs').value=r.obs||'';
         (r.itens||[]).forEach(item => addItemRecibo(item));
     } else {
         addItemRecibo(); // item vazio inicial
@@ -1384,6 +1475,9 @@ function saveRecibo(e){
         placa:document.getElementById('r-placa').value,
         pelicula:document.getElementById('r-pelicula').value,
         data:document.getElementById('r-data').value,
+        pagamento:document.getElementById('r-pagamento').value,
+        garantia:document.getElementById('r-garantia').value,
+        obs:document.getElementById('r-obs').value,
         itens
     };
     if(id) r.id=parseInt(id);
@@ -1401,67 +1495,162 @@ function saveRecibo(e){
 function gerarHTMLRecibo(r){
     const c=clientes.find(x=>x.id===r.clienteId);
     const nome=c?c.nome:'(cliente)';
+    const telefone=c?.telefone||'';
     const total = calcTotal(r.itens);
+    const numDoc = String(r.id).padStart(5,'0');
+    const pagamento = r.pagamento || 'Pix';
+    const garantia = r.garantia;
     const itensHTML = (r.itens||[]).map(item=>{
-        const foto = item.foto ? `<img src="${item.foto}" style="width:52px;height:40px;object-fit:contain;">` : `<div style="width:52px;height:40px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#bbb;">sem foto</div>`;
-        return `<tr><td class="ci">${foto}</td><td>${item.descricao}</td><td class="cg">${item.qtd}</td><td class="cv">${fmtM(item.preco)}</td><td class="cv">${fmtM(item.qtd * parseFloat((item.preco||'').replace(',','.')))}</td></tr>`;
+        const preco = parseFloat((item.preco||'').toString().replace(',','.')) || 0;
+        const subtotal = (item.qtd||1) * preco;
+        const foto = item.foto
+            ? `<img src="${item.foto}" style="width:50px;height:38px;object-fit:contain;border-radius:4px;border:1px solid #eee;">`
+            : `<div style="width:50px;height:38px;background:#f5f5f5;border-radius:4px;border:1px dashed #ddd;display:flex;align-items:center;justify-content:center;font-size:7px;color:#bbb;text-align:center;">SEM<br>FOTO</div>`;
+        return `<tr><td class="ci">${foto}</td><td>${item.descricao}</td><td class="cg">${item.qtd}</td><td class="cv">${fmtM(preco)}</td><td class="cv" style="font-weight:700;color:#0a6640;">${fmtM(subtotal)}</td></tr>`;
     }).join('');
+
+    const logoHtml = cfg.logo
+        ? `<img src="${cfg.logo}" style="height:52px;max-width:140px;object-fit:contain;">`
+        : `<div style="width:52px;height:52px;background:#e70000;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;color:#fff;">${(cfg.nomeEmpresa||'TF').substring(0,2).toUpperCase()}</div>`;
+
     return `
     <div class="pdf-wrap">
         <div class="pdf-header">
             <div>
-                <div class="pdf-logo-text"><span>${cfg.nomeEmpresa}</span></div>
-                <div class="pdf-logo-sub">RECIBO DE PAGAMENTO</div>
+                <div class="pdf-logo-text"><span>${cfg.nomeEmpresa||'Tony Fumê'}</span></div>
+                <div class="pdf-logo-sub">Especialistas em Película Automotiva</div>
+                <div class="pdf-doc-badge">&#xf543; Recibo de Pagamento</div>
+                <div class="pdf-doc-num">N.º ${numDoc}</div>
             </div>
-            ${cfg.logo?`<img src="${cfg.logo}" style="height:48px;">`:''}
+            ${logoHtml}
+        </div>
+        <div class="pdf-company-strip">
+            <div class="pdf-company-info">
+                ${cfg.cnpj?`<div><strong>CNPJ:</strong> ${cfg.cnpj}</div>`:''}
+                ${cfg.endereco?`<div><strong>Endereço:</strong> ${cfg.endereco}</div>`:''}
+            </div>
+            <div class="pdf-company-info" style="text-align:right;">
+                ${cfg.whatsapp?`<div><strong>WhatsApp:</strong> ${cfg.whatsapp}</div>`:''}
+                ${cfg.instagram?`<div><strong>Instagram:</strong> ${cfg.instagram}</div>`:''}
+            </div>
         </div>
         <div class="pdf-body">
-            <div class="pdf-info-row"><strong>Recebemos de:</strong> ${nome}</div>
-            <div class="pdf-info-row"><strong>Data:</strong> ${fmtD(r.data)}</div>
-            <div class="pdf-info-row"><strong>Veículo:</strong> ${r.modelo||''} ${r.placa?'• '+r.placa:''}</div>
-            <div class="pdf-info-row"><strong>Película:</strong> ${r.pelicula||'—'}</div>
-            <table class="pdf-table">
-                <thead><tr><th>Foto</th><th>Descrição</th><th>Qtd</th><th>Unit.</th><th>Total</th></tr></thead>
-                <tbody>${itensHTML}</tbody>
-            </table>
-            <div class="pdf-total-row">
-                <span>TOTAL</span>
-                <span>${fmtM(total)}</span>
+            <div class="pdf-section">
+                <div class="pdf-section-title">&#xf007; Dados do Cliente</div>
+                <div class="pdf-info-grid">
+                    <div class="pdf-info-item-full">
+                        <div class="pdf-info-label">Recebemos de</div>
+                        <div class="pdf-info-value" style="font-size:13px;">${nome}</div>
+                    </div>
+                    ${telefone?`<div class="pdf-info-item"><div class="pdf-info-label">Telefone</div><div class="pdf-info-value">${telefone}</div></div>`:''}
+                    <div class="pdf-info-item"><div class="pdf-info-label">Data do Serviço</div><div class="pdf-info-value">${dataExtenso(r.data)}</div></div>
+                    <div class="pdf-info-item"><div class="pdf-info-label">Pagamento</div><div class="pdf-info-value">${pagamento}</div></div>
+                </div>
             </div>
-            <div class="pdf-total-row" style="background:#333;color:#ccc;font-size:10px;">
-                <span>${valorExtenso(total)}</span>
+            ${r.modelo||r.placa||r.pelicula?`
+            <div class="pdf-section">
+                <div class="pdf-section-title">&#xf1b9; Dados do Veículo</div>
+                <div class="pdf-info-grid">
+                    ${r.modelo?`<div class="pdf-info-item"><div class="pdf-info-label">Modelo</div><div class="pdf-info-value">${r.modelo}</div></div>`:''}
+                    ${r.placa?`<div class="pdf-info-item"><div class="pdf-info-label">Placa</div><div class="pdf-info-value" style="font-family:monospace;font-size:13px;letter-spacing:1px;">${r.placa}</div></div>`:''}
+                    ${r.pelicula?`<div class="pdf-info-item-full"><div class="pdf-info-label">Tipo de Película Aplicada</div><div class="pdf-info-value">${r.pelicula}</div></div>`:''}
+                </div>
+            </div>`:''}
+            <div class="pdf-section">
+                <div class="pdf-section-title">&#xf0ca; Serviços / Produtos</div>
+                <table class="pdf-table">
+                    <thead><tr><th class="ci">Foto</th><th>Descrição</th><th class="cg">Qtd</th><th class="cv">Unit.</th><th class="cv">Subtotal</th></tr></thead>
+                    <tbody>${itensHTML}</tbody>
+                    <tfoot><tr><td colspan="4" style="text-align:right;color:#555;">TOTAL DO PEDIDO</td><td style="color:#0a6640;font-size:13px;">${fmtM(total)}</td></tr></tfoot>
+                </table>
+                <div class="pdf-total-wrap">
+                    <div><div class="pdf-total-label">Valor Total Pago</div></div>
+                    <div class="pdf-total-value"><span class="pdf-total-acento">R$</span> ${parseFloat(total).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+                </div>
+                <div class="pdf-extenso">${valorExtenso(total)}</div>
             </div>
-            ${r.obs ? `<div class="pdf-obs"><strong>Obs:</strong> ${r.obs}</div>` : ''}
-            <div style="margin-top:20px;text-align:center;">
-                <div style="border-top:1px solid #000;width:200px;margin:0 auto;"></div>
-                <p style="font-size:11px;">Assinatura do Responsável</p>
+            ${cfg.pix?`<div class="pdf-pix-row">&#x1F4B0; <span><strong>Chave PIX:</strong> ${cfg.pix}</span></div>`:''}
+            ${r.obs?`<div class="pdf-obs"><strong>Observações</strong>${r.obs}</div>`:''}
+            ${garantia?`<div style="background:#e8f0fb;border:1px solid #bfdbfe;border-radius:6px;padding:8px 14px;margin:10px 0;font-size:10px;"><strong style="color:#1a3a6b;">&#x1F6E1;&#xFE0F; Garantia:</strong> Este serviço possui garantia de <strong>${garantia} meses</strong> a partir da data acima.</div>`:''}
+            <div class="pdf-sign-section">
+                <div class="pdf-sign-block">
+                    <div class="pdf-sign-line"></div>
+                    <div class="pdf-sign-name">${cfg.responsavel||cfg.nomeEmpresa||'Tony Fumê'}</div>
+                    <div class="pdf-sign-role">${cfg.cargo||'Responsável'}</div>
+                </div>
+                <div class="pdf-sign-block">
+                    <div class="pdf-sign-line"></div>
+                    <div class="pdf-sign-name">${nome}</div>
+                    <div class="pdf-sign-role">Cliente</div>
+                </div>
             </div>
         </div>
         <div class="pdf-footer">
-            ${cfg.endereco} | ${cfg.whatsapp} | ${cfg.instagram}
+            <div class="pdf-footer-left">
+                <strong>${cfg.nomeEmpresa||'Tony Fumê'}</strong>
+                ${cfg.cnpj?`<span class="pdf-footer-divider">|</span>CNPJ: ${cfg.cnpj}`:''}
+            </div>
+            <div class="pdf-footer-right">Documento gerado em ${new Date().toLocaleString('pt-BR')}</div>
         </div>
     </div>`;
 }
 
 function verRecibo(id, baixar=false){
     const r=recibos.find(x=>x.id===id);if(!r)return;
-    document.getElementById('recibo-content').innerHTML=gerarHTMLRecibo(r);
+    const el = document.getElementById('recibo-content');
+    el.innerHTML=gerarHTMLRecibo(r);
+    el.dataset.reciboId = r.id;
     document.getElementById('btn-dl-recibo').onclick=()=>baixarRecibosPdf();
     openSheet('ver-recibo');
     if(baixar) setTimeout(baixarRecibosPdf,500);
 }
 
 function baixarRecibosPdf(){
-    window.jsPDF=window.jspdf.jsPDF;
-    const el=document.getElementById('recibo-content');
-    const doc=new jsPDF('p','mm','a4');
-    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{
-        const imgData=canvas.toDataURL('image/png');
-        const pageW=210,margin=8,usableW=pageW-2*margin;
-        const imgH=(canvas.height*usableW)/canvas.width;
-        doc.addImage(imgData,'PNG',margin,margin,usableW,Math.min(imgH,297-2*margin));
-        doc.save(`recibo_${Date.now()}.pdf`);
-        toast('PDF baixado! 📄');
+    const btn = document.getElementById('btn-dl-recibo');
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando PDF...';
+    btn.disabled = true;
+
+    window.jsPDF = window.jspdf.jsPDF;
+    const el = document.getElementById('recibo-content');
+    const reciboAtual = recibos.find(r => {
+        const cont = document.getElementById('recibo-content');
+        return cont && cont.dataset.reciboId == r.id;
+    });
+    const c = reciboAtual ? clientes.find(x => x.id === reciboAtual.clienteId) : null;
+    const nomeArq = reciboAtual
+        ? `recibo_${String(reciboAtual.id).padStart(4,'0')}_${(c?.nome||'cliente').replace(/\s+/g,'_').toLowerCase()}_${reciboAtual.data||''}.pdf`
+        : `recibo_${Date.now()}.pdf`;
+
+    html2canvas(el, {scale:3, useCORS:true, backgroundColor:'#ffffff', logging:false}).then(canvas=>{
+        const doc = new jsPDF('p','mm','a4');
+        const pageW=210, pageH=297, margin=10, usableW=pageW-2*margin;
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const imgH = (canvas.height * usableW) / canvas.width;
+
+        if(imgH <= pageH - 2*margin){
+            doc.addImage(imgData,'JPEG',margin,margin,usableW,imgH);
+        } else {
+            // Multi-page
+            let yPos = 0;
+            const pageImgH = pageH - 2*margin;
+            while(yPos < imgH){
+                if(yPos > 0) doc.addPage();
+                const srcY = yPos * (canvas.height / imgH);
+                const srcH = Math.min(pageImgH * (canvas.height / imgH), canvas.height - srcY);
+                const tmpCanvas = document.createElement('canvas');
+                tmpCanvas.width = canvas.width;
+                tmpCanvas.height = srcH;
+                tmpCanvas.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+                doc.addImage(tmpCanvas.toDataURL('image/jpeg',0.95),'JPEG',margin,margin,usableW,Math.min(pageImgH, imgH-yPos));
+                yPos += pageImgH;
+            }
+        }
+        doc.save(nomeArq);
+        toast('PDF baixado com sucesso! 📄');
+    }).finally(()=>{
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
     });
 }
 
@@ -1539,6 +1728,7 @@ function renderOrcamentos(q=''){
             <div class="action-row">
                 <button class="btn-sm btn-blue" onclick="verOrcamento(${o.id})"><i class="fas fa-eye"></i> Ver</button>
                 <button class="btn-sm btn-light" onclick="editarOrcamento(${o.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-sm btn-green" onclick="converterOrcamentoEmRecibo(${o.id})"><i class="fas fa-exchange-alt"></i></button>
                 <button class="btn-sm btn-red" onclick="excluirOrcamento(${o.id})"><i class="fas fa-trash"></i></button>
             </div>
             <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
@@ -1641,44 +1831,172 @@ function saveOrcamento(e){
 
 function gerarHTMLOrcamento(o){
     const total=calcTotal(o.itens);
+    const numDoc = String(o.id).padStart(5,'0');
+    const dataValidade = o.data && o.validade ? (() => {
+        const d = new Date(o.data+'T12:00:00');
+        d.setDate(d.getDate() + parseInt(o.validade||30));
+        return d.toLocaleDateString('pt-BR');
+    })() : '';
+
     const itensHTML=(o.itens||[]).map(item=>{
-        const foto = item.foto ? `<img src="${item.foto}" style="width:52px;height:40px;object-fit:contain;">` : `<div style="width:52px;height:40px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#bbb;">sem foto</div>`;
-        return `<tr><td>${foto}</td><td>${item.descricao}</td><td>${item.qtd}</td><td>${fmtM(item.preco)}</td><td>${fmtM(item.qtd * parseFloat((item.preco||'').replace(',','.')))}</td></tr>`;
+        const preco = parseFloat((item.preco||'').toString().replace(',','.')) || 0;
+        const subtotal = (item.qtd||1) * preco;
+        const foto = item.foto
+            ? `<img src="${item.foto}" style="width:50px;height:38px;object-fit:contain;border-radius:4px;border:1px solid #eee;">`
+            : `<div style="width:50px;height:38px;background:#f5f5f5;border-radius:4px;border:1px dashed #ddd;display:flex;align-items:center;justify-content:center;font-size:7px;color:#bbb;text-align:center;">SEM<br>FOTO</div>`;
+        return `<tr><td class="ci">${foto}</td><td>${item.descricao}</td><td class="cg">${item.qtd}</td><td class="cv">${fmtM(preco)}</td><td class="cv" style="font-weight:700;color:#1a3a6b;">${fmtM(subtotal)}</td></tr>`;
     }).join('');
-    return `<div class="pdf-wrap">
-        <div class="pdf-header"><div><div class="pdf-logo-text"><span>${cfg.nomeEmpresa}</span></div><div class="pdf-logo-sub">ORÇAMENTO</div></div>${cfg.logo?`<img src="${cfg.logo}" style="height:48px;">`:''}</div>
-        <div class="pdf-body">
-            <div class="pdf-info-row"><strong>Empresa/Solicitante:</strong> ${o.empresa}</div>
-            <div class="pdf-info-row"><strong>CNPJ:</strong> ${o.cnpjSolicitante||'—'}</div>
-            <div class="pdf-info-row"><strong>Veículo:</strong> ${o.modelo||''} ${o.placa?'• '+o.placa:''}</div>
-            <div class="pdf-info-row"><strong>Película:</strong> ${o.pelicula||'—'}</div>
-            <div class="pdf-info-row"><strong>Validade:</strong> ${o.validade||30} dias</div>
-            <table class="pdf-table"><thead><tr><th>Foto</th><th>Descrição</th><th>Qtd</th><th>Unit.</th><th>Total</th></tr></thead><tbody>${itensHTML}</tbody></table>
-            <div class="pdf-total-row"><span>TOTAL</span><span>${fmtM(total)}</span></div>
-            <div class="pdf-total-row" style="background:#333;color:#ccc;font-size:10px;"><span>${valorExtenso(total)}</span></div>
-            ${o.obs?`<div class="pdf-obs"><strong>Obs:</strong> ${o.obs}</div>`:''}
-            <div style="margin-top:20px;text-align:center;"><div style="border-top:1px solid #000;width:200px;margin:0 auto;"></div><p style="font-size:11px;">Assinatura do Responsável</p></div>
+
+    const logoHtml = cfg.logo
+        ? `<img src="${cfg.logo}" style="height:52px;max-width:140px;object-fit:contain;">`
+        : `<div style="width:52px;height:52px;background:#e70000;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-weight:700;font-size:18px;color:#fff;">${(cfg.nomeEmpresa||'TF').substring(0,2).toUpperCase()}</div>`;
+
+    const statusMap = {aceito:'Aceito ✓', pendente:'Pendente ⏳', recusado:'Recusado ✗'};
+    const statusColors = {aceito:'#0a6640', pendente:'#c2410c', recusado:'#b91c1c'};
+    const status = o.status||'pendente';
+
+    return `
+    <div class="pdf-wrap">
+        <div class="pdf-header">
+            <div>
+                <div class="pdf-logo-text"><span>${cfg.nomeEmpresa||'Tony Fumê'}</span></div>
+                <div class="pdf-logo-sub">Especialistas em Película Automotiva</div>
+                <div class="pdf-doc-badge">&#xf571; Orçamento Comercial</div>
+                <div class="pdf-doc-num">N.º ${numDoc} &nbsp;|&nbsp; <span style="color:${statusColors[status]||'#aaa'};">${statusMap[status]||'Pendente'}</span></div>
+            </div>
+            ${logoHtml}
         </div>
-        <div class="pdf-footer">${cfg.endereco} | ${cfg.whatsapp} | ${cfg.instagram}</div>
+        <div class="pdf-company-strip">
+            <div class="pdf-company-info">
+                ${cfg.cnpj?`<div><strong>CNPJ:</strong> ${cfg.cnpj}</div>`:''}
+                ${cfg.endereco?`<div><strong>Endereço:</strong> ${cfg.endereco}</div>`:''}
+            </div>
+            <div class="pdf-company-info" style="text-align:right;">
+                ${cfg.whatsapp?`<div><strong>WhatsApp:</strong> ${cfg.whatsapp}</div>`:''}
+                ${cfg.instagram?`<div><strong>Instagram:</strong> ${cfg.instagram}</div>`:''}
+            </div>
+        </div>
+        <div class="pdf-body">
+            <div class="pdf-section">
+                <div class="pdf-section-title">&#xf0b1; Dados do Solicitante</div>
+                <div class="pdf-info-grid">
+                    <div class="pdf-info-item-full">
+                        <div class="pdf-info-label">Empresa / Cliente</div>
+                        <div class="pdf-info-value" style="font-size:13px;">${o.empresa||'—'}</div>
+                    </div>
+                    ${o.cnpjSolicitante?`<div class="pdf-info-item"><div class="pdf-info-label">CNPJ do Solicitante</div><div class="pdf-info-value">${o.cnpjSolicitante}</div></div>`:''}
+                    <div class="pdf-info-item"><div class="pdf-info-label">Data de Emissão</div><div class="pdf-info-value">${dataExtenso(o.data)}</div></div>
+                    <div class="pdf-info-item">
+                        <div class="pdf-info-label">Validade do Orçamento</div>
+                        <div class="pdf-info-value"><span class="pdf-validade-badge">&#x23F0; ${o.validade||30} dias${dataValidade?' — até '+dataValidade:''}</span></div>
+                    </div>
+                    <div class="pdf-info-item"><div class="pdf-info-label">Local</div><div class="pdf-info-value">${o.cidade||'Maceió (AL)'}</div></div>
+                    <div class="pdf-info-item"><div class="pdf-info-label">Forma de Pagamento</div><div class="pdf-info-value">${o.pagamento||'Pix / Transferência'}</div></div>
+                </div>
+            </div>
+            ${o.modelo||o.placa||o.pelicula?`
+            <div class="pdf-section">
+                <div class="pdf-section-title">&#xf1b9; Dados do Veículo</div>
+                <div class="pdf-info-grid">
+                    ${o.modelo?`<div class="pdf-info-item"><div class="pdf-info-label">Modelo</div><div class="pdf-info-value">${o.modelo}</div></div>`:''}
+                    ${o.placa?`<div class="pdf-info-item"><div class="pdf-info-label">Placa</div><div class="pdf-info-value" style="font-family:monospace;font-size:13px;letter-spacing:1px;">${o.placa}</div></div>`:''}
+                    ${o.pelicula?`<div class="pdf-info-item-full"><div class="pdf-info-label">Tipo de Película</div><div class="pdf-info-value">${o.pelicula}</div></div>`:''}
+                </div>
+            </div>`:''}
+            <div class="pdf-section">
+                <div class="pdf-section-title">&#xf0ca; Itens do Orçamento</div>
+                <table class="pdf-table">
+                    <thead><tr><th class="ci">Foto</th><th>Descrição</th><th class="cg">Qtd</th><th class="cv">Unit.</th><th class="cv">Subtotal</th></tr></thead>
+                    <tbody>${itensHTML}</tbody>
+                    <tfoot><tr><td colspan="4" style="text-align:right;color:#555;">TOTAL DO ORÇAMENTO</td><td style="color:#1a3a6b;font-size:13px;">${fmtM(total)}</td></tr></tfoot>
+                </table>
+                <div class="pdf-total-wrap" style="background:linear-gradient(135deg,#1a3a6b,#0d2040);">
+                    <div><div class="pdf-total-label">Valor Total do Orçamento</div></div>
+                    <div class="pdf-total-value"><span class="pdf-total-acento" style="color:#90caf9;">R$</span> ${parseFloat(total).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+                </div>
+                <div class="pdf-extenso">${valorExtenso(total)}</div>
+            </div>
+            ${cfg.pix?`<div class="pdf-pix-row">&#x1F4B0; <span><strong>Chave PIX:</strong> ${cfg.pix}</span></div>`:''}
+            ${o.obs?`<div class="pdf-obs"><strong>Observações</strong>${o.obs}</div>`:''}
+            <div style="background:#e8f0fb;border:1px solid #bfdbfe;border-radius:6px;padding:10px 14px;margin:12px 0;font-size:10px;line-height:1.6;color:#333;">
+                <strong style="color:#1a3a6b;display:block;margin-bottom:4px;">&#x2139;&#xFE0F; Condições Gerais</strong>
+                Este orçamento tem validade de <strong>${o.validade||30} dias</strong>. Os valores podem sofrer alteração após este prazo.
+                Pagamento via <strong>${o.pagamento||'Pix / Transferência'}</strong>. Para aceitar este orçamento, entre em contato.
+            </div>
+            <div class="pdf-sign-section">
+                <div class="pdf-sign-block">
+                    <div class="pdf-sign-line"></div>
+                    <div class="pdf-sign-name">${cfg.responsavel||cfg.nomeEmpresa||'Tony Fumê'}</div>
+                    <div class="pdf-sign-role">${cfg.cargo||'Responsável'}</div>
+                </div>
+                <div class="pdf-sign-block">
+                    <div class="pdf-sign-line"></div>
+                    <div class="pdf-sign-name">${o.empresa||'Solicitante'}</div>
+                    <div class="pdf-sign-role">Aprovação do Cliente</div>
+                </div>
+            </div>
+        </div>
+        <div class="pdf-footer">
+            <div class="pdf-footer-left">
+                <strong>${cfg.nomeEmpresa||'Tony Fumê'}</strong>
+                ${cfg.cnpj?`<span class="pdf-footer-divider">|</span>CNPJ: ${cfg.cnpj}`:''}
+            </div>
+            <div class="pdf-footer-right">Orçamento N.º ${numDoc} &nbsp;|&nbsp; Gerado em ${new Date().toLocaleString('pt-BR')}</div>
+        </div>
     </div>`;
 }
+
 function verOrcamento(id){
     const o=orcamentos.find(x=>x.id===id);if(!o)return;
-    document.getElementById('orc-preview-wrap').innerHTML=gerarHTMLOrcamento(o);
+    const el = document.getElementById('orc-preview-wrap');
+    el.innerHTML=gerarHTMLOrcamento(o);
+    el.dataset.orcId = o.id;
     document.getElementById('btn-dl-orc').onclick=()=>baixarOrcPdf();
     openSheet('ver-orcamento');
 }
 function baixarOrcPdf(){
-    window.jsPDF=window.jspdf.jsPDF;
-    const el=document.getElementById('orc-preview-wrap');
-    const doc=new jsPDF('p','mm','a4');
-    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{
-        const imgData=canvas.toDataURL('image/png');
-        const pageW=210,margin=8,usableW=pageW-2*margin;
-        const imgH=(canvas.height*usableW)/canvas.width;
-        doc.addImage(imgData,'PNG',margin,margin,usableW,Math.min(imgH,297-2*margin));
-        doc.save(`orcamento_${Date.now()}.pdf`);
-        toast('PDF baixado! 📄');
+    const btn = document.getElementById('btn-dl-orc');
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando PDF...';
+    btn.disabled = true;
+
+    window.jsPDF = window.jspdf.jsPDF;
+    const el = document.getElementById('orc-preview-wrap');
+    const orcAtual = orcamentos.find(o => {
+        return el.dataset.orcId == o.id;
+    });
+    const nomeArq = orcAtual
+        ? `orcamento_${String(orcAtual.id).padStart(4,'0')}_${(orcAtual.empresa||'cliente').replace(/\s+/g,'_').toLowerCase()}_${orcAtual.data||''}.pdf`
+        : `orcamento_${Date.now()}.pdf`;
+
+    html2canvas(el, {scale:3, useCORS:true, backgroundColor:'#ffffff', logging:false}).then(canvas=>{
+        const doc = new jsPDF('p','mm','a4');
+        const pageW=210, pageH=297, margin=10, usableW=pageW-2*margin;
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const imgH = (canvas.height * usableW) / canvas.width;
+
+        if(imgH <= pageH - 2*margin){
+            doc.addImage(imgData,'JPEG',margin,margin,usableW,imgH);
+        } else {
+            let yPos = 0;
+            const pageImgH = pageH - 2*margin;
+            while(yPos < imgH){
+                if(yPos > 0) doc.addPage();
+                const srcY = yPos * (canvas.height / imgH);
+                const srcH = Math.min(pageImgH * (canvas.height / imgH), canvas.height - srcY);
+                const tmpCanvas = document.createElement('canvas');
+                tmpCanvas.width = canvas.width;
+                tmpCanvas.height = srcH;
+                tmpCanvas.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+                doc.addImage(tmpCanvas.toDataURL('image/jpeg',0.95),'JPEG',margin,margin,usableW,Math.min(pageImgH, imgH-yPos));
+                yPos += pageImgH;
+            }
+        }
+        doc.save(nomeArq);
+        toast('PDF baixado com sucesso! 📄');
+    }).finally(()=>{
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
     });
 }
 
@@ -2152,6 +2470,97 @@ async function restaurarBackup(input){
 // ╔══════════════════════════════╗
 // ║         INIT                 ║
 // ╚══════════════════════════════╝
+
+// ─── COMPARTILHAR WHATSAPP ───
+function compartilharWhatsApp(tipo){
+    let msg = '';
+    if(tipo === 'recibo'){
+        const el = document.getElementById('recibo-content');
+        const rId = el?.dataset?.reciboId;
+        const r = rId ? recibos.find(x=>x.id==rId) : null;
+        const c = r ? clientes.find(x=>x.id===r.clienteId) : null;
+        const total = r ? calcTotal(r.itens) : 0;
+        msg = `*${cfg.nomeEmpresa||'Tony Fumê'} — Recibo de Pagamento*
+
+`;
+        msg += `Olá${c?' '+c.nome.split(' ')[0]:''}! Segue o recibo do serviço realizado.
+
+`;
+        if(r?.modelo) msg += `🚗 *Veículo:* ${r.modelo}${r.placa?' ('+r.placa+')':''}
+`;
+        if(r?.pelicula) msg += `🎬 *Película:* ${r.pelicula}
+`;
+        msg += `📅 *Data:* ${fmtD(r?.data||'')}
+`;
+        msg += `💰 *Total:* ${fmtM(total)}
+`;
+        if(r?.garantia) msg += `🛡️ *Garantia:* ${r.garantia} meses
+`;
+        msg += `
+${cfg.whatsapp?'📱 '+cfg.whatsapp:''}`;
+    } else {
+        const el = document.getElementById('orc-preview-wrap');
+        const oId = el?.dataset?.orcId;
+        const o = oId ? orcamentos.find(x=>x.id==oId) : null;
+        const total = o ? calcTotal(o.itens) : 0;
+        msg = `*${cfg.nomeEmpresa||'Tony Fumê'} — Orçamento*
+
+`;
+        msg += `Olá${o?' '+o.empresa.split(' ')[0]:''}! Segue o orçamento solicitado.
+
+`;
+        if(o?.modelo) msg += `🚗 *Veículo:* ${o.modelo}${o.placa?' ('+o.placa+')':''}
+`;
+        if(o?.pelicula) msg += `🎬 *Película:* ${o.pelicula}
+`;
+        msg += `📅 *Data:* ${fmtD(o?.data||'')}
+`;
+        msg += `⏰ *Validade:* ${o?.validade||30} dias
+`;
+        msg += `💰 *Total:* ${fmtM(total)}
+`;
+        msg += `
+_Para aceitar, responda esta mensagem._
+${cfg.whatsapp?'📱 '+cfg.whatsapp:''}`;
+    }
+    const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+}
+
+// ╔══════════════════════════════════════════╗
+// ║  CONVERTER ORÇAMENTO EM RECIBO           ║
+// ╚══════════════════════════════════════════╝
+function converterOrcamentoEmRecibo(id){
+    const o = orcamentos.find(x=>x.id===id);
+    if(!o) return;
+    if(!confirm(`Converter orçamento #${o.id} (${o.empresa}) em recibo?\nOs dados do orçamento serão copiados para um novo recibo.`)) return;
+
+    // Tenta encontrar cliente pelo nome
+    let clienteId = '';
+    const clienteEncontrado = clientes.find(c => c.nome.toLowerCase() === (o.empresa||'').toLowerCase());
+    if(clienteEncontrado){
+        clienteId = clienteEncontrado.id;
+    }
+
+    // Preenche formulário de recibo com dados do orçamento
+    document.getElementById('r-id').value = '';
+    document.getElementById('recibo-form-title').textContent = 'Novo Recibo (do Orçamento #'+o.id+')';
+    populateClienteSelect();
+    document.getElementById('r-cliente').value = clienteId;
+    document.getElementById('r-modelo').value = o.modelo||'';
+    document.getElementById('r-placa').value = o.placa||'';
+    document.getElementById('r-pelicula').value = o.pelicula||'';
+    document.getElementById('r-data').value = today();
+    document.getElementById('r-pagamento').value = o.pagamento||'Pix';
+    document.getElementById('r-garantia').value = '12';
+    document.getElementById('r-obs').value = o.obs ? 'Ref. Orçamento #'+o.id+' — '+o.obs : 'Ref. Orçamento #'+o.id;
+    document.getElementById('recibo-itens-container').innerHTML = '';
+    reciboFotos = {};
+    (o.itens||[]).forEach(item => addItemRecibo(item));
+    openSheet('recibo');
+    toast('Orçamento copiado! Revise e salve o recibo. ✅');
+}
+
 async function init(){
     await initDB();
 
