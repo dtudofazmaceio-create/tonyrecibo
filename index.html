@@ -266,11 +266,11 @@
         #orcamento-preview {
             background: #fff;
             font-family: Arial, sans-serif;
-            font-size: 13px;
+            font-size: 12px;
             color: #222;
             max-width: 760px;
             margin: 0 auto;
-            padding: 30px 35px;
+            padding: 22px 28px;
             border: 1px solid #ccc;
             position: relative;
             overflow: hidden;
@@ -291,7 +291,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .orc-logo-area img {
@@ -318,15 +318,15 @@
 
         .orc-intro {
             text-align: justify;
-            margin-bottom: 15px;
-            font-size: 13px;
-            line-height: 1.7;
+            margin-bottom: 10px;
+            font-size: 12px;
+            line-height: 1.6;
         }
 
-        .orc-solicitante { margin-bottom: 15px; font-size: 13px; }
+        .orc-solicitante { margin-bottom: 10px; font-size: 12px; }
         .orc-solicitante p { margin: 2px 0; }
 
-        .orc-table-wrapper { border: 1px solid #333; margin-bottom: 15px; }
+        .orc-table-wrapper { border: 1px solid #333; margin-bottom: 10px; }
 
         .orc-table-title {
             background-color: var(--cor-orcamento);
@@ -359,13 +359,13 @@
             padding: 10px;
         }
 
-        .orc-obs { font-size: 12px; margin-bottom: 12px; line-height: 1.6; }
-        .orc-pagamento { font-size: 12px; margin-bottom: 20px; line-height: 1.8; }
-        .orc-pagamento strong { font-weight: bold; display: block; margin-bottom: 4px; }
-        .orc-footer-loc { text-align: right; font-size: 12px; margin-bottom: 30px; }
-        .orc-assinatura { margin-top: 10px; }
-        .orc-assinatura p { font-size: 12px; margin: 2px 0; }
-        .orc-assinatura .linha-ass { border-top: 1px solid #333; width: 250px; margin: 30px 0 5px 0; }
+        .orc-obs { font-size: 11px; margin-bottom: 8px; line-height: 1.5; }
+        .orc-pagamento { font-size: 11px; margin-bottom: 14px; line-height: 1.7; }
+        .orc-pagamento strong { font-weight: bold; display: block; margin-bottom: 2px; }
+        .orc-footer-loc { text-align: right; font-size: 11px; margin-bottom: 20px; }
+        .orc-assinatura { margin-top: 6px; }
+        .orc-assinatura p { font-size: 11px; margin: 2px 0; }
+        .orc-assinatura .linha-ass { border-top: 1px solid #333; width: 220px; margin: 22px 0 4px 0; }
 
         /* Modal orcamento form */
         .orcamento-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -1976,25 +1976,34 @@ btnDownloadOrcPdf.addEventListener('click', () => {
     const doc = new jsPDF('p', 'pt', 'a4');
     const element = document.getElementById('orcamento-preview');
     if (!element) return;
-    html2canvas(element, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
+
+    // Capture at high resolution for quality
+    html2canvas(element, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
+
+        // A4 dimensions in points
         const pageW = 595.28;
         const pageH = 841.89;
-        const margin = 20;
+        const margin = 18;
         const usableW = pageW - 2 * margin;
-        const imgH = (canvas.height * usableW) / canvas.width;
+        const usableH = pageH - 2 * margin;
 
-        if (imgH <= pageH - 2 * margin) {
-            doc.addImage(imgData, 'PNG', margin, margin, usableW, imgH);
-        } else {
-            let y = 0;
-            const pageImgH = pageH - 2 * margin;
-            while (y < imgH) {
-                if (y > 0) doc.addPage();
-                doc.addImage(imgData, 'PNG', margin, margin - y, usableW, imgH);
-                y += pageImgH;
-            }
+        // Calculate image dimensions preserving aspect ratio
+        const canvasAspect = canvas.height / canvas.width;
+        let drawW = usableW;
+        let drawH = usableW * canvasAspect;
+
+        // If taller than one page, scale down to fit height
+        if (drawH > usableH) {
+            drawH = usableH;
+            drawW = usableH / canvasAspect;
         }
+
+        // Center horizontally if width was reduced
+        const xOffset = margin + (usableW - drawW) / 2;
+        const yOffset = margin;
+
+        doc.addImage(imgData, 'PNG', xOffset, yOffset, drawW, drawH);
         doc.save(`orcamento-${Date.now()}.pdf`);
     });
 });
