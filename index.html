@@ -1,2538 +1,1448 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tony Fumê - Sistema de Recibos & Orçamentos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        :root {
-            --cor-principal: #000;
-            --cor-secundaria: #fff;
-            --cor-destaque: #e70000;
-            --cor-orcamento: #1a3a6b;
-            --cor-financeiro: #0a6640;
-            --cor-financeiro-light: #e8f5ee;
-            --fonte: 'Arial', sans-serif;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: var(--fonte);
-            background-color: #f0f0f0;
-            color: var(--cor-principal);
-            line-height: 1.6;
-        }
-
-        header {
-            background-color: var(--cor-principal);
-            color: var(--cor-secundaria);
-            padding: 20px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border-bottom: 5px solid var(--cor-destaque);
-            position: relative;
-            overflow: hidden;
-        }
-
-        #header-bg {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover;
-            opacity: 0.08;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        header > * { position: relative; z-index: 1; }
-
-        .logo-container { margin-bottom: 10px; }
-        #logo { max-width: 200px; height: auto; }
-
-        h1 {
-            font-size: 2em;
-            font-weight: bold;
-            color: var(--cor-destaque);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .header-buttons {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .header-buttons button {
-            background-color: var(--cor-destaque);
-            color: var(--cor-secundaria);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-
-        .header-buttons button:hover { background-color: #d10000; }
-        
-        .header-buttons button.btn-orcamento {
-            background-color: var(--cor-orcamento);
-        }
-        .header-buttons button.btn-orcamento:hover { background-color: #122c54; }
-
-        .header-buttons button.btn-financeiro {
-            background-color: var(--cor-financeiro);
-        }
-        .header-buttons button.btn-financeiro:hover { background-color: #074d2f; }
-
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-
-        section {
-            background-color: var(--cor-secundaria);
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            color: var(--cor-destaque);
-            border-bottom: 2px solid var(--cor-destaque);
-            padding-bottom: 5px;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background-color: var(--cor-principal);
-            color: var(--cor-secundaria);
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .card.card-orcamento { background-color: var(--cor-orcamento); }
-        .card.card-financeiro { background-color: var(--cor-financeiro); }
-        .card h3 { font-size: 1.1em; margin-bottom: 10px; }
-        .card p { font-size: 1.8em; font-weight: bold; }
-        .card small { font-size: 0.7em; opacity: 0.8; display:block; margin-top:4px; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
-        th, td { padding: 10px 12px; border-bottom: 1px solid #ddd; font-size: 0.9em; }
-        thead tr { background-color: #f2f2f2; color: var(--cor-principal); }
-        tbody tr:nth-child(even) { background-color: #f9f9f9; }
-
-        .btn-acao {
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1em;
-            color: var(--cor-principal);
-            margin-right: 8px;
-        }
-        .btn-acao:hover { color: var(--cor-destaque); }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
-            overflow-y: auto;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: var(--cor-secundaria);
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 650px;
-            position: relative;
-            animation: animatetop 0.3s ease;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        }
-
-        .modal-content.modal-wide { max-width: 900px; }
-
-        /* Scroll horizontal no preview — mobile */
-        #modal-view-orcamento .modal-content {
-            overflow-x: auto;
-            padding: 16px;
-        }
-        #modal-view-orcamento #orcamento-preview {
-            margin: 0;
-            border-radius: 4px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-        }
-        .modal-content.modal-financeiro { max-width: 960px; }
-
-        .close-btn {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            line-height: 1;
-        }
-        .close-btn:hover { color: var(--cor-destaque); }
-
-        @keyframes animatetop {
-            from { top: -50px; opacity: 0; }
-            to { top: 0; opacity: 1; }
-        }
-
-        form { display: flex; flex-direction: column; gap: 12px; }
-        form label { font-weight: bold; color: var(--cor-principal); font-size: 0.9em; }
-
-        form input, form textarea, form select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 0.95em;
-            outline-color: var(--cor-destaque);
-        }
-
-        form button {
-            background-color: var(--cor-destaque);
-            color: var(--cor-secundaria);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-        form button:hover { background-color: #d10000; }
-
-        /* =====================
-           RECIBO STYLES
-           ===================== */
-        #recibo-content {
-            padding: 15px;
-            border: 1px solid var(--cor-destaque);
-            margin-bottom: 15px;
-            position: relative;
-            background-color: var(--cor-secundaria);
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            overflow: visible;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .recibo-bg-img {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover;
-            opacity: 0.08;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .recibo-content-inner { position: relative; z-index: 1; }
-
-        .recibo-header { text-align: center; margin-bottom: 15px; padding: 20px 0 5px 0; }
-        .recibo-header img { max-width: 120px; margin-bottom: 5px; }
-        .recibo-header h3 { color: var(--cor-principal); text-transform: uppercase; letter-spacing: 1px; font-size: 1.2em; }
-
-        .recibo-body { padding: 15px; border-bottom: 1px dashed #ccc; margin-bottom: 15px; }
-        .recibo-info-grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
-        .recibo-info-box { border: 1px solid #ccc; padding: 8px 12px; border-radius: 5px; background-color: #f9f9f9; }
-        .recibo-info-box h4 { font-size: 0.8em; color: #555; margin-bottom: 3px; }
-        .recibo-info-box p { font-size: 0.9em; font-weight: bold; color: var(--cor-principal); }
-
-        .recibo-assinatura { text-align: center; margin-top: 20px; padding-top: 10px; }
-        .recibo-assinatura .linha-assinatura { border-top: 1px solid var(--cor-destaque); display: inline-block; width: 250px; margin-bottom: 5px; }
-        .recibo-assinatura p { font-size: 0.9em; color: var(--cor-principal); margin-top: 5px; }
-
-        .recibo-footer {
-            background-color: var(--cor-principal);
-            color: var(--cor-secundaria);
-            padding: 10px;
-            border-radius: 0 0 10px 10px;
-            text-align: center;
-            margin-top: 15px;
-        }
-        .recibo-footer p { margin: 3px 0; font-size: 0.8em; }
-        .recibo-footer .contato-container { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
-        .recibo-footer .contato-item { display: flex; align-items: center; gap: 5px; }
-
-        /* ============================================
-           ORÇAMENTO STYLES — layout ref: Adonai
-           ============================================ */
-
-        /* container principal — largura fixa para captura consistente */
-        #orcamento-preview {
-            background: #fff;
-            font-family: Arial, sans-serif;
-            font-size: 13px;
-            color: #222;
-            width: 750px;
-            min-width: 750px;
-            margin: 0 auto;
-            padding: 30px 36px 28px 36px;
-            border: 1px solid #d0d0d0;
-            position: relative;
-            overflow: visible;
-            box-sizing: border-box;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        /* imagem de fundo opcional */
-        .orc-bg-img {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover;
-            opacity: 0.04;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .orc-inner { position: relative; z-index: 1; }
-
-        /* ── CABEÇALHO: logo esq | nome+subtítulo dir ── */
-        .orc-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 18px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .orc-logo-area {
-            display: flex;
-            align-items: center;
-        }
-        .orc-logo-area img {
-            max-height: 80px;
-            max-width: 190px;
-            object-fit: contain;
-        }
-        .orc-logo-placeholder {
-            width: 100px; height: 60px;
-            background: #f0f0f0;
-            border: 1px dashed #bbb;
-            border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; color: #aaa;
-        }
-
-        .orc-empresa-nome {
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        .orc-empresa-nome .nome-grande {
-            font-size: 30px;
-            font-weight: 900;
-            color: var(--cor-orcamento);
-            letter-spacing: 2px;
-            line-height: 1;
-            text-transform: uppercase;
-        }
-        .orc-empresa-nome .subtitulo {
-            font-size: 12px;
-            color: #555;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-top: 3px;
-            font-weight: 400;
-        }
-
-        /* ── PARÁGRAFO INTRODUTÓRIO ── */
-        .orc-intro {
-            text-align: justify;
-            margin-bottom: 14px;
-            font-size: 13px;
-            line-height: 1.7;
-            color: #333;
-        }
-
-        /* ── BLOCO SOLICITANTE: texto simples, sem fundo ── */
-        .orc-solicitante {
-            margin-bottom: 16px;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-        .orc-solicitante p { margin: 0; }
-
-        /* ── TABELA DE ORÇAMENTO ── */
-        .orc-table-wrapper {
-            border: 1px solid #bbb;
-            margin-bottom: 16px;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .orc-table-title {
-            background-color: var(--cor-orcamento);
-            color: #fff;
-            text-align: center;
-            font-weight: bold;
-            font-size: 13px;
-            letter-spacing: 4px;
-            padding: 10px 12px;
-            text-transform: uppercase;
-        }
-
-        .orc-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-        .orc-table thead tr { background-color: #fff; }
-        .orc-table th {
-            border: 1px solid #ccc;
-            padding: 9px 12px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #222;
-            text-align: left;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-        .orc-table th.col-img  { width: 70px; text-align: center; border-left: none; }
-        .orc-table th.col-garantia { width: 90px; text-align: center; }
-        .orc-table th.col-valor    { width: 120px; text-align: right; }
-
-        .orc-table td {
-            border: 1px solid #ddd;
-            padding: 10px 12px;
-            vertical-align: middle;
-            font-size: 12.5px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-        .orc-table td.col-img  { text-align: center; width: 70px; border-left: none; padding: 8px 6px; }
-        .orc-table td.col-img img { max-width: 58px; max-height: 54px; object-fit: contain; }
-        .orc-table td.col-img .sem-foto {
-            width: 58px; height: 48px;
-            background: #f0f0f0;
-            border-radius: 4px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 9px; color: #bbb;
-            margin: 0 auto;
-        }
-        .orc-table td.col-garantia { text-align: center; width: 90px; }
-        .orc-table td.col-valor    { text-align: right; font-weight: bold; width: 120px; }
-
-        /* linha de total — fundo cinza claro, texto escuro, bold */
-        .orc-table .row-total td {
-            background-color: #f0f0f0;
-            color: #222;
-            font-weight: bold;
-            text-align: center;
-            font-size: 13px;
-            border-top: 2px solid #bbb;
-            padding: 11px 12px;
-        }
-
-        /* ── OBSERVAÇÃO ── */
-        .orc-obs {
-            font-size: 12.5px;
-            margin-bottom: 14px;
-            line-height: 1.6;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: pre-wrap;
-            color: #222;
-        }
-        .orc-obs strong { font-weight: bold; }
-
-        /* ── CONDIÇÕES DE PAGAMENTO ── */
-        .orc-pagamento {
-            font-size: 12.5px;
-            margin-bottom: 18px;
-            line-height: 1.8;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            color: #222;
-        }
-        .orc-pagamento strong {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 2px;
-            color: #222;
-        }
-
-        /* ── LOCALIDADE / DATA ── */
-        .orc-footer-loc {
-            text-align: right;
-            font-size: 12.5px;
-            margin-bottom: 26px;
-            color: #333;
-        }
-
-        /* ── ASSINATURA ── */
-        .orc-assinatura { margin-top: 4px; }
-        .orc-assinatura > p.atenc {
-            font-size: 12.5px;
-            margin-bottom: 4px;
-            color: #333;
-        }
-        /* linha de assinatura — idêntica ao ref */
-        .orc-assinatura .linha-ass {
-            border-top: 1.5px solid #444;
-            width: 260px;
-            margin: 28px 0 5px 0;
-        }
-        .orc-assinatura .ass-nome {
-            font-size: 12.5px;
-            font-weight: bold;
-            color: #222;
-            margin: 0;
-        }
-        .orc-assinatura .ass-cargo {
-            font-size: 12px;
-            color: #444;
-            margin: 1px 0 0 0;
-        }
-
-        /* Modal orcamento form */
-        .orcamento-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .orcamento-form-grid .full { grid-column: 1 / -1; }
-
-        .itens-orcamento { margin-top: 10px; }
-
-        .item-orcamento-row {
-            display: grid;
-            grid-template-columns: 80px 1fr 80px 110px 36px;
-            gap: 6px;
-            align-items: start;
-            margin-bottom: 8px;
-            padding: 8px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .item-orcamento-row input, .item-orcamento-row textarea {
-            width: 100%;
-            padding: 6px 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 0.85em;
-        }
-
-        .item-orcamento-row textarea { resize: vertical; min-height: 55px; }
-
-        .btn-remover-item {
-            background: #e70000; color: #fff; border: none; border-radius: 4px;
-            cursor: pointer; padding: 6px 8px; font-size: 0.9em; align-self: flex-start;
-        }
-        .btn-remover-item:hover { background: #b80000; }
-
-        .btn-add-item { background-color: var(--cor-orcamento) !important; }
-        .btn-add-item:hover { background-color: #122c54 !important; }
-
-        .item-img-preview {
-            width: 55px; height: 50px; object-fit: contain; display: block;
-            margin-top: 4px; border: 1px solid #eee; border-radius: 4px;
-        }
-
-        .img-upload-label {
-            display: block; font-size: 0.75em; color: #666; cursor: pointer;
-            text-align: center; padding: 4px; background: #eee;
-            border-radius: 4px; border: 1px dashed #bbb;
-        }
-        .img-upload-label:hover { background: #ddd; }
-
-        .btn-salvar-orcamento { background-color: var(--cor-orcamento) !important; }
-        .btn-salvar-orcamento:hover { background-color: #122c54 !important; }
-
-        /* Tabs */
-        .tabs { display: flex; gap: 0; margin-bottom: 0; }
-
-        .tab-btn {
-            padding: 10px 22px; border: none; border-bottom: 3px solid transparent;
-            background: #f0f0f0; cursor: pointer; font-weight: bold; font-size: 0.95em;
-            transition: all 0.2s;
-        }
-
-        .tab-btn.active { background: #fff; border-bottom: 3px solid var(--cor-destaque); color: var(--cor-destaque); }
-        .tab-btn.active-blue { border-bottom-color: var(--cor-orcamento); color: var(--cor-orcamento); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .badge {
-            display: inline-block; background: var(--cor-orcamento); color: #fff;
-            border-radius: 10px; font-size: 0.75em; padding: 1px 8px;
-            margin-left: 6px; vertical-align: middle;
-        }
-
-        #btn-download-pdf, #btn-download-orc-pdf {
-            background-color: var(--cor-destaque); color: #fff; border: none;
-            padding: 10px 22px; border-radius: 5px; cursor: pointer; font-weight: bold;
-            font-size: 0.95em; transition: background-color 0.3s; margin-top: 10px;
-            display: flex; align-items: center; gap: 8px; justify-content: center;
-        }
-        #btn-download-pdf:hover, #btn-download-orc-pdf:hover { background-color: #d10000; }
-        #btn-download-pdf:disabled, #btn-download-orc-pdf:disabled {
-            background-color: #999; cursor: not-allowed;
-        }
-
-        footer {
-            text-align: center; padding: 20px; background-color: var(--cor-principal);
-            color: var(--cor-secundaria); margin-top: 20px;
-            border-top: 5px solid var(--cor-destaque);
-        }
-
-        #loading-message { text-align: center; color: #555; margin-top: 10px; font-style: italic; }
-
-        /* ============================================
-           PAINEL FINANCEIRO
-           ============================================ */
-        .fin-section-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: var(--cor-financeiro);
-            border-bottom: 2px solid var(--cor-financeiro);
-            padding-bottom: 6px;
-            margin: 20px 0 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .fin-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 14px;
-            margin-bottom: 18px;
-        }
-
-        .fin-card {
-            padding: 16px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border: 1px solid transparent;
-        }
-
-        .fin-card.verde { background: #e8f5ee; border-color: #b2dfca; }
-        .fin-card.azul  { background: #e8f0fb; border-color: #b3c7f0; }
-        .fin-card.laranja { background: #fff4e5; border-color: #f5c67b; }
-        .fin-card.vermelho { background: #fdeaea; border-color: #f5b3b3; }
-        .fin-card.roxo { background: #f3eeff; border-color: #c5a9f5; }
-        .fin-card.cinza { background: #f5f5f5; border-color: #ddd; }
-
-        .fin-card-icon { font-size: 1.6em; margin-bottom: 6px; }
-        .fin-card-label { font-size: 0.78em; color: #555; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .fin-card-value { font-size: 1.4em; font-weight: bold; color: #222; }
-        .fin-card-sub { font-size: 0.72em; color: #777; margin-top: 3px; }
-
-        .fin-barra-container {
-            background: #eee;
-            border-radius: 20px;
-            height: 14px;
-            overflow: hidden;
-            margin: 6px 0 4px 0;
-        }
-
-        .fin-barra {
-            height: 100%;
-            border-radius: 20px;
-            transition: width 0.8s ease;
-        }
-
-        .fin-barra.verde { background: linear-gradient(90deg, #1a9955, #0a6640); }
-        .fin-barra.laranja { background: linear-gradient(90deg, #f5a623, #c97d00); }
-        .fin-barra.vermelho { background: linear-gradient(90deg, #e74c3c, #b03020); }
-
-        .fin-projecao-box {
-            background: linear-gradient(135deg, #0a6640, #1a7c50);
-            color: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 16px 0;
-        }
-
-        .fin-projecao-box h3 { font-size: 1em; margin-bottom: 14px; opacity: 0.9; letter-spacing: 1px; }
-
-        .fin-projecao-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-
-        .fin-proj-item { text-align: center; }
-        .fin-proj-item .val { font-size: 1.5em; font-weight: bold; }
-        .fin-proj-item .lab { font-size: 0.72em; opacity: 0.8; }
-
-        .fin-alerta {
-            display: flex; align-items: flex-start; gap: 10px;
-            border-radius: 8px; padding: 12px 16px; margin: 10px 0;
-            font-size: 0.88em; line-height: 1.5;
-        }
-        .fin-alerta.info { background: #e8f4ff; border-left: 4px solid #2196F3; color: #0c4a80; }
-        .fin-alerta.sucesso { background: #e8f5ee; border-left: 4px solid #28a745; color: #0a4a20; }
-        .fin-alerta.aviso { background: #fff4e5; border-left: 4px solid #ff9800; color: #7a4400; }
-        .fin-alerta.perigo { background: #fdeaea; border-left: 4px solid #e53935; color: #7a1010; }
-        .fin-alerta i { margin-top: 2px; font-size: 1.1em; }
-
-        .fin-cap-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 14px;
-        }
-
-        .fin-cap-card {
-            border: 2px solid;
-            border-radius: 10px;
-            padding: 16px;
-        }
-
-        .fin-cap-card.reserva { border-color: #f5a623; background: #fff9ef; }
-        .fin-cap-card.capital { border-color: #1a3a6b; background: #f0f4ff; }
-
-        .fin-cap-card h4 { font-size: 0.95em; font-weight: bold; margin-bottom: 8px; }
-        .fin-cap-card.reserva h4 { color: #c97d00; }
-        .fin-cap-card.capital h4 { color: #1a3a6b; }
-
-        .fin-cap-card p { font-size: 0.82em; color: #444; line-height: 1.6; margin-bottom: 8px; }
-
-        .fin-cap-valor {
-            font-size: 1.6em;
-            font-weight: bold;
-            margin: 4px 0;
-        }
-        .fin-cap-card.reserva .fin-cap-valor { color: #c97d00; }
-        .fin-cap-card.capital .fin-cap-valor { color: #1a3a6b; }
-
-        .fin-cap-progress {
-            background: #eee;
-            border-radius: 20px;
-            height: 10px;
-            overflow: hidden;
-            margin: 8px 0 4px 0;
-        }
-        .fin-cap-progress-bar { height: 100%; border-radius: 20px; }
-        .fin-cap-card.reserva .fin-cap-progress-bar { background: linear-gradient(90deg, #f5a623, #c97d00); }
-        .fin-cap-card.capital .fin-cap-progress-bar { background: linear-gradient(90deg, #1a3a6b, #0d2145); }
-
-        .fin-mes-grafico {
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-            height: 80px;
-            padding: 0 4px;
-            border-bottom: 2px solid #ddd;
-            margin: 14px 0 6px 0;
-        }
-
-        .fin-barra-mes {
-            flex: 1;
-            border-radius: 4px 4px 0 0;
-            min-width: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            cursor: default;
-            transition: opacity 0.2s;
-            position: relative;
-        }
-
-        .fin-barra-mes:hover { opacity: 0.8; }
-
-        .fin-barra-mes-fill {
-            width: 100%;
-            border-radius: 4px 4px 0 0;
-        }
-
-        .fin-barra-mes-label {
-            font-size: 0.65em;
-            color: #666;
-            margin-top: 5px;
-            white-space: nowrap;
-        }
-
-        .fin-orcamento-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.78em;
-            font-weight: bold;
-        }
-
-        .fin-orcamento-status.pendente { background: #fff4e5; color: #c97d00; border: 1px solid #f5c67b; }
-        .fin-orcamento-status.aceito   { background: #e8f5ee; color: #0a6640; border: 1px solid #b2dfca; }
-        .fin-orcamento-status.recusado { background: #fdeaea; color: #b03020; border: 1px solid #f5b3b3; }
-
-        .fin-slider-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 6px 0;
-        }
-        .fin-slider-container input[type=range] {
-            flex: 1;
-            accent-color: var(--cor-financeiro);
-            height: 6px;
-        }
-        .fin-slider-container span { min-width: 40px; text-align: right; font-weight: bold; font-size: 0.9em; color: var(--cor-financeiro); }
-
-        .fin-orcamento-status-sel {
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 0.82em;
-            cursor: pointer;
-        }
-
-        /* ============================================
-           RESPONSIVIDADE COMPLETA
-           ============================================ */
-
-        /* Tablet */
-        @media (max-width: 900px) {
-            .modal-content.modal-wide,
-            .modal-content.modal-financeiro { max-width: 98vw; }
-            #orcamento-preview { padding: 20px 16px; font-size: 12px; }
-        }
-
-        /* Mobile */
-        @media (max-width: 768px) {
-            /* Header */
-            header { padding: 14px 12px; }
-            h1 { font-size: 1.3em; letter-spacing: 1px; }
-            #logo { max-width: 130px; }
-            .header-buttons { flex-direction: column; gap: 8px; width: 100%; }
-            .header-buttons button { width: 100%; padding: 12px 10px; font-size: 0.92em; }
-
-            /* Container */
-            .container { padding: 0 10px; margin: 12px auto; }
-            section { padding: 14px 12px; }
-
-            /* Cards */
-            .card-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .card p { font-size: 1.4em; }
-
-            /* Tabs */
-            .tab-btn { padding: 8px 12px; font-size: 0.85em; }
-
-            /* Tables — scroll horizontal */
-            table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
-            th, td { padding: 8px 10px; font-size: 0.82em; }
-
-            /* Modais */
-            .modal-content { margin: 2% auto; padding: 18px 14px; width: 96%; }
-            .modal-content.modal-wide,
-            .modal-content.modal-financeiro { max-width: 100%; width: 96%; margin: 2% auto; }
-
-            /* Forms */
-            .orcamento-form-grid { grid-template-columns: 1fr; }
-            .item-orcamento-row { grid-template-columns: 1fr; gap: 8px; }
-
-            /* Orçamento preview */
-            #orcamento-preview { padding: 14px 10px; font-size: 11px; }
-            .orc-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .orc-empresa-nome { text-align: left; }
-            .orc-empresa-nome .nome-grande { font-size: 20px; }
-            .orc-logo-area img { max-height: 50px; max-width: 130px; }
-
-            /* Recibo */
-            .recibo-assinatura .linha-assinatura { width: 180px; }
-            .recibo-footer .contato-container { flex-direction: column; gap: 5px; }
-
-            /* Painel financeiro */
-            .fin-projecao-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .fin-cap-grid { grid-template-columns: 1fr; }
-            .fin-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .fin-card-value { font-size: 1.1em; }
-            .fin-section-title { font-size: 0.95em; }
-
-            /* Botões de ação nas tabelas */
-            .btn-acao { font-size: 1em; margin-right: 5px; }
-        }
-
-        /* Celular pequeno */
-        @media (max-width: 480px) {
-            h1 { font-size: 1.1em; }
-            .card-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .card p { font-size: 1.2em; }
-            .fin-projecao-grid { grid-template-columns: 1fr; }
-            .fin-cards { grid-template-columns: 1fr 1fr; }
-            .modal-content { padding: 14px 10px; }
-            #orcamento-preview { font-size: 10px; }
-            .orc-empresa-nome .nome-grande { font-size: 16px; }
-        }
-
-        @media print {
-            body * { visibility: hidden; }
-            #modal-view-recibo, #modal-view-recibo * { visibility: visible; display: block; }
-            #modal-view-recibo { position: absolute; left: 0; top: 0; }
-            #modal-view-recibo .modal-content { width: 21cm; margin: 0; padding: 1cm; box-shadow: none; background: #fff; }
-            #btn-download-pdf, .close-btn { display: none !important; }
-            /* Print para orçamento */
-            #modal-view-orcamento, #modal-view-orcamento * { visibility: visible; }
-            #modal-view-orcamento { position: absolute; left: 0; top: 0; }
-            #modal-view-orcamento .modal-content { width: 21cm; margin: 0; padding: 0.5cm; box-shadow: none; }
-            #btn-download-orc-pdf { display: none !important; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tony Fumê - Sistema</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --azul: #1a2e5a;
+    --azul-medio: #2d4a8a;
+    --azul-claro: #e8edf7;
+    --dourado: #c9a84c;
+    --texto: #1a1a2e;
+    --cinza: #6b7280;
+    --borda: #d1d5db;
+    --bg: #f4f6fb;
+    --branco: #ffffff;
+    --verde: #16a34a;
+    --vermelho: #dc2626;
+    --amarelo-bg: #fffbeb;
+    --amarelo-borda: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--texto);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: var(--azul);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+  .header .logo-tag { font-size: 11px; color: var(--dourado); letter-spacing: 2px; text-transform: uppercase; }
+  .btn-menu { background: none; border: none; color: white; font-size: 22px; cursor: pointer; padding: 4px; }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    display: flex;
+    background: var(--branco);
+    border-bottom: 2px solid var(--borda);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 1;
+    min-width: 90px;
+    padding: 12px 8px;
+    border: none;
+    background: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cinza);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { color: var(--azul); border-bottom-color: var(--azul); }
+  .tab-btn .tab-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+
+  /* ─── PÁGINAS ─── */
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--branco);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border: 1px solid var(--borda);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--azul);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--azul-claro);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ─── INPUTS ─── */
+  .form-group { margin-bottom: 12px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cinza);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--borda);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--texto);
+    background: var(--branco);
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--azul-medio);
+  }
+  .form-textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  /* ─── BOTÕES ─── */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--azul); color: white; }
+  .btn-secondary { background: var(--azul-claro); color: var(--azul); }
+  .btn-success { background: var(--verde); color: white; }
+  .btn-danger { background: var(--vermelho); color: white; }
+  .btn-gold { background: var(--dourado); color: white; }
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: 12px;
+    border-radius: 8px;
+    width: auto;
+    margin-bottom: 0;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--azul);
+    color: var(--azul);
+  }
+
+  /* ─── ITENS DA TABELA (orçamento/recibo) ─── */
+  .item-list { display: flex; flex-direction: column; gap: 8px; }
+  .item-card {
+    border: 1.5px solid var(--borda);
+    border-radius: 10px;
+    padding: 12px;
+    background: var(--azul-claro);
+    position: relative;
+  }
+  .item-card .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .item-card .item-desc {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--azul);
+    flex: 1;
+    margin-right: 8px;
+  }
+  .item-card .item-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--verde);
+    white-space: nowrap;
+  }
+  .item-card .item-sub {
+    font-size: 12px;
+    color: var(--cinza);
+  }
+  .item-card .btn-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--vermelho);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  /* ─── TOTAL ─── */
+  .total-box {
+    background: var(--azul);
+    color: white;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .total-box .total-label { font-size: 13px; font-weight: 600; opacity: 0.85; }
+  .total-box .total-valor { font-size: 20px; font-weight: 700; }
+
+  /* ─── FOTO UPLOAD ─── */
+  .foto-upload {
+    border: 2px dashed var(--azul-medio);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--azul-claro);
+    position: relative;
+    overflow: hidden;
+  }
+  .foto-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .foto-upload-text { font-size: 12px; color: var(--cinza); margin-top: 4px; }
+  .foto-preview { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; display: none; }
+
+  /* ─── LISTA DE DOCUMENTOS ─── */
+  .doc-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    background: var(--branco);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .doc-item:active { background: var(--azul-claro); }
+  .doc-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--azul-claro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .doc-info { flex: 1; min-width: 0; }
+  .doc-title { font-size: 13px; font-weight: 600; color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .doc-sub { font-size: 11px; color: var(--cinza); margin-top: 1px; }
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-pago { background: #dcfce7; color: #166534; }
+  .badge-pendente { background: #fef9c3; color: #854d0e; }
+  .badge-cancelado { background: #fee2e2; color: #991b1b; }
+
+  /* ─── ALERTA ─── */
+  .alerta {
+    background: var(--amarelo-bg);
+    border: 1px solid var(--amarelo-borda);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--branco);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 20px 16px 32px;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--borda);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--azul);
+    margin-bottom: 16px;
+  }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 16px;
+    right: 16px;
+    background: var(--azul);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 300;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ─── LOADING ─── */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,46,90,0.85);
+    z-index: 400;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .loading-overlay.open { display: flex; }
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: white; font-size: 14px; font-weight: 600; }
+
+  /* ─── SEPARADOR ─── */
+  .sep { height: 1px; background: var(--borda); margin: 12px 0; }
+
+  /* ─── TEMPLATE PDF (escondido, renderizado antes de converter) ─── */
+  #pdf-template {
+    position: fixed;
+    left: -9999px;
+    top: 0;
+    width: 390px;
+    background: white;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #1a1a2e;
+    z-index: -1;
+    overflow: visible;
+  }
+
+  /* ─── ESTILOS DO TEMPLATE PDF ─── */
+  .pdf-wrap {
+    width: 390px;
+    background: white;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  .pdf-header {
+    background: #1a2e5a;
+    padding: 20px 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pdf-logo-text {
+    color: white;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+  }
+  .pdf-logo-sub {
+    color: #c9a84c;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .pdf-logo-img {
+    width: 64px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+  .pdf-body { padding: 20px 24px; }
+  .pdf-empresa-desc {
+    font-size: 11px;
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .pdf-info-block {
+    border-left: 3px solid #1a2e5a;
+    padding-left: 12px;
+    margin-bottom: 12px;
+  }
+  .pdf-info-row {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #374151;
+  }
+  .pdf-info-row strong { color: #1a2e5a; }
+  .pdf-section-title {
+    background: #1a2e5a;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 3px;
+    padding: 8px 12px;
+    border-radius: 6px 6px 0 0;
+    margin-top: 16px;
+  }
+  .pdf-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #d1d5db;
+    border-top: none;
+  }
+  .pdf-table th {
+    background: #f3f4f6;
+    font-size: 10px;
+    font-weight: 700;
+    color: #374151;
+    padding: 7px 10px;
+    text-align: left;
+    border-bottom: 1px solid #d1d5db;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pdf-table th.right, .pdf-table td.right { text-align: right; }
+  .pdf-table th.center, .pdf-table td.center { text-align: center; }
+  .pdf-table td {
+    font-size: 11px;
+    color: #374151;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+    word-break: break-word;
+  }
+  .pdf-table tr:last-child td { border-bottom: none; }
+  .pdf-table tr:nth-child(even) td { background: #f9fafb; }
+  .pdf-item-img {
+    width: 52px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    display: block;
+  }
+  .pdf-sem-foto {
+    width: 52px;
+    height: 40px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #9ca3af;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .pdf-total-row {
+    background: #1a2e5a;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0 0 6px 6px;
+  }
+  .pdf-total-label { color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600; }
+  .pdf-total-valor { color: white; font-size: 16px; font-weight: 800; }
+  .pdf-total-extenso { color: #c9a84c; font-size: 10px; }
+  .pdf-obs-block {
+    margin-top: 16px;
+    border-left: 3px solid #c9a84c;
+    background: #fffbeb;
+    padding: 10px 12px;
+    border-radius: 0 6px 6px 0;
+  }
+  .pdf-obs-title { font-size: 11px; font-weight: 700; color: #92400e; margin-bottom: 4px; }
+  .pdf-obs-text { font-size: 11px; color: #374151; line-height: 1.6; word-break: break-word; }
+  .pdf-assinatura {
+    margin-top: 24px;
+    display: flex;
+    gap: 20px;
+  }
+  .pdf-assin-box {
+    flex: 1;
+    border-top: 1px solid #374151;
+    padding-top: 6px;
+    text-align: center;
+    font-size: 10px;
+    color: #6b7280;
+  }
+  .pdf-footer {
+    background: #f3f4f6;
+    padding: 10px 24px;
+    text-align: center;
+    font-size: 9px;
+    color: #9ca3af;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 24px;
+  }
+  .pdf-validade {
+    display: inline-block;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+  .pdf-tipo-badge {
+    display: inline-block;
+    background: #e8edf7;
+    color: #1a2e5a;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .pdf-numero {
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 12px;
+  }
+</style>
 </head>
 <body>
 
-<header id="header">
-    <img id="header-bg" src="" alt="" style="display:none;">
-    <div class="logo-container">
-        <img id="logo" src="" alt="Logo" style="display:none;">
-    </div>
-    <h1 id="titulo-sistema">Meus Recibos & Orçamentos</h1>
-    <div class="header-buttons">
-        <button id="btn-config"><i class="fas fa-cog"></i> Configurações</button>
-        <button id="btn-add-recibo"><i class="fas fa-file-alt"></i> Criar Recibo</button>
-        <button id="btn-add-cliente"><i class="fas fa-user-plus"></i> Cadastrar Cliente</button>
-        <button class="btn-orcamento" id="btn-add-orcamento"><i class="fas fa-file-invoice-dollar"></i> Criar Orçamento</button>
-        <button class="btn-financeiro" id="btn-painel-financeiro"><i class="fas fa-chart-line"></i> Painel Financeiro</button>
-    </div>
-</header>
-
-<main class="container">
-
-    <section id="sumario">
-        <h2>Resumo Geral</h2>
-        <div class="card-grid">
-            <div class="card">
-                <h3>Total de Recibos</h3>
-                <p id="total-recibos">0</p>
-            </div>
-            <div class="card">
-                <h3>Valor Total (Recibos)</h3>
-                <p id="valor-total">R$ 0,00</p>
-            </div>
-            <div class="card card-orcamento">
-                <h3>Total de Orçamentos</h3>
-                <p id="total-orcamentos">0</p>
-            </div>
-            <div class="card card-orcamento">
-                <h3>Valor Total (Orçamentos)</h3>
-                <p id="valor-total-orcamentos">R$ 0,00</p>
-            </div>
-            <div class="card">
-                <h3>Clientes Cadastrados</h3>
-                <p id="total-clientes">0</p>
-            </div>
-            <div class="card card-financeiro" style="cursor:pointer;" onclick="document.getElementById('btn-painel-financeiro').click()">
-                <h3>Receita do Mês</h3>
-                <p id="receita-mes-resumo">R$ 0,00</p>
-                <small>Clique para ver o painel</small>
-            </div>
-        </div>
-    </section>
-
-    <section id="historico">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="trocarTab('tab-recibos', this)">
-                <i class="fas fa-file-alt"></i> Recibos
-            </button>
-            <button class="tab-btn" onclick="trocarTab('tab-orcamentos', this, true)">
-                <i class="fas fa-file-invoice-dollar"></i> Orçamentos
-                <span class="badge" id="badge-orcamentos">0</span>
-            </button>
-        </div>
-
-        <div id="tab-recibos" class="tab-content active" style="padding-top:15px;">
-            <h2 style="margin-top:0;">Histórico de Recibos</h2>
-            <table id="tabela-recibos">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Valor</th>
-                        <th>Data</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div id="tab-orcamentos" class="tab-content" style="padding-top:15px;">
-            <h2 style="margin-top:0; color: var(--cor-orcamento); border-color: var(--cor-orcamento);">Histórico de Orçamentos</h2>
-            <table id="tabela-orcamentos">
-                <thead>
-                    <tr>
-                        <th>Nº</th>
-                        <th>Empresa/Solicitante</th>
-                        <th>Valor Total</th>
-                        <th>Data</th>
-                        <th>Validade</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </section>
-
-    <section id="clientes">
-        <h2>Clientes Cadastrados</h2>
-        <table id="tabela-clientes">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Telefone</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </section>
-
-</main>
-
-<!-- ============================
-     MODAL CONFIGURAÇÕES
-     ============================ -->
-<div id="modal-config" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2>Configurações da Empresa</h2>
-        <form id="form-config">
-            <label>Nome da Empresa:</label>
-            <input type="text" id="config-nome-empresa" placeholder="Ex: Tony Fumê">
-
-            <label>CNPJ:</label>
-            <input type="text" id="config-cnpj" value="13.949.583/0001-32">
-
-            <label>Endereço completo:</label>
-            <input type="text" id="config-endereco" value="Avenida Juca Sampaio, 1552, Jacintinho">
-
-            <label>Instagram:</label>
-            <input type="text" id="config-instagram" value="@tonyfume">
-
-            <label>WhatsApp:</label>
-            <input type="text" id="config-whatsapp" value="(82)99806-9585">
-
-            <label>Responsável Legal (para orçamentos):</label>
-            <input type="text" id="config-responsavel" placeholder="Ex: Thiogo Jefferson Nobre Lima">
-
-            <label>Cargo do Responsável:</label>
-            <input type="text" id="config-cargo" placeholder="Ex: Responsável legal por Tony Fumê">
-
-            <label>Chave Pix:</label>
-            <input type="text" id="config-pix" placeholder="CNPJ ou chave pix">
-
-            <label>Upload da Logo: <small style="font-weight:normal;color:#666;">(aplicada em recibos, orçamentos e header)</small></label>
-            <input type="file" id="config-logo" accept="image/*">
-            <div style="display:flex;align-items:center;gap:8px;margin-top:-6px;">
-                <input type="checkbox" id="config-logo-rembg" checked style="width:auto;">
-                <label for="config-logo-rembg" style="font-weight:normal;font-size:0.85em;color:#555;margin:0;">Remover fundo da logo automaticamente</label>
-            </div>
-            <p id="loading-message" style="display:none;">Processando imagem...</p>
-            <div id="logo-preview-container" style="display:none;margin-top:4px;">
-                <img id="logo-preview" style="max-height:80px;border:1px solid #eee;border-radius:6px;background:#f5f5f5;padding:4px;" alt="Preview da logo">
-                <button type="button" id="btn-remover-logo" style="display:block;margin-top:4px;padding:4px 10px;background:#e70000;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:0.8em;">Remover Logo</button>
-            </div>
-
-            <label>Upload do Plano de Fundo: <small style="font-weight:normal;color:#666;">(aplicado em recibos, orçamentos e header)</small></label>
-            <input type="file" id="config-background" accept="image/*">
-
-            <button type="submit">Salvar Configurações</button>
-        </form>
-    </div>
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="logo-tag">Sistema</div>
+    <h1>TONY FUMÊ</h1>
+  </div>
+  <button class="btn-menu" onclick="abrirConfigModal()">⚙️</button>
 </div>
 
-<!-- ============================
-     MODAL RECIBO
-     ============================ -->
-<div id="modal-recibo" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2 id="modal-recibo-titulo">Criar Novo Recibo</h2>
-        <form id="form-recibo">
-            <input type="hidden" id="recibo-id-edicao">
-            <label>Cliente:</label>
-            <select id="recibo-cliente" required>
-                <option value="" disabled selected>Selecione um cliente</option>
-            </select>
-            <label>Serviço:</label>
-            <textarea id="recibo-servico" rows="3" required></textarea>
-            <label>Valor:</label>
-            <input type="number" id="recibo-valor" step="0.01" required>
-            <label>Data:</label>
-            <input type="date" id="recibo-data" required>
-            <button type="submit" id="btn-salvar-recibo">Baixar Recibo</button>
-        </form>
-    </div>
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showPage('novo-doc', this)">
+    <span class="tab-icon">📄</span>Novo Doc
+  </button>
+  <button class="tab-btn" onclick="showPage('historico', this)">
+    <span class="tab-icon">📋</span>Histórico
+  </button>
+  <button class="tab-btn" onclick="showPage('empresa', this)">
+    <span class="tab-icon">🏢</span>Empresa
+  </button>
 </div>
 
-<!-- ============================
-     MODAL CLIENTE
-     ============================ -->
-<div id="modal-cliente" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2 id="modal-cliente-titulo">Cadastrar Novo Cliente</h2>
-        <form id="form-cliente">
-            <input type="hidden" id="cliente-id-edicao">
-            <label>Nome:</label>
-            <input type="text" id="cliente-nome" required>
-            <label>Telefone:</label>
-            <input type="text" id="cliente-telefone">
-            <label>CNPJ (opcional):</label>
-            <input type="text" id="cliente-cnpj" placeholder="Ex: 79.379.491/0182-01">
-            <button type="submit">Salvar Cliente</button>
-        </form>
+<!-- ══════════════ PÁGINA: NOVO DOCUMENTO ══════════════ -->
+<div id="page-novo-doc" class="page active">
+
+  <!-- Tipo de documento -->
+  <div class="card">
+    <div class="card-title">📄 Tipo de Documento</div>
+    <div class="form-row">
+      <button class="btn btn-primary" id="btn-tipo-orc" onclick="setTipo('orcamento')" style="font-size:13px;">
+        📋 Orçamento
+      </button>
+      <button class="btn btn-secondary" id="btn-tipo-rec" onclick="setTipo('recibo')" style="font-size:13px;">
+        🧾 Recibo
+      </button>
     </div>
+    <div class="form-group" style="margin-top:4px; margin-bottom:0;">
+      <label class="form-label">Nº do Documento</label>
+      <input type="text" class="form-input" id="doc-numero" placeholder="Ex: 0042" style="font-size:15px; font-weight:600;">
+    </div>
+  </div>
+
+  <!-- Dados do cliente -->
+  <div class="card">
+    <div class="card-title">👤 Cliente</div>
+    <div class="form-group">
+      <label class="form-label">Nome / Empresa</label>
+      <input type="text" class="form-input" id="cliente-nome" placeholder="Nome do cliente">
+    </div>
+    <div class="form-group">
+      <label class="form-label">CPF / CNPJ</label>
+      <input type="text" class="form-input" id="cliente-doc" placeholder="000.000.000-00">
+    </div>
+  </div>
+
+  <!-- Dados do veículo -->
+  <div class="card">
+    <div class="card-title">🚗 Veículo</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Veículo / Modelo</label>
+        <input type="text" class="form-input" id="veiculo-modelo" placeholder="Ex: Fiesta">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Placa</label>
+        <input type="text" class="form-input" id="veiculo-placa" placeholder="Ex: ABC-1234" style="text-transform:uppercase;">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Película / Serviço</label>
+      <input type="text" class="form-input" id="veiculo-pelicula" placeholder="Ex: Fume, Residencial, etc.">
+    </div>
+  </div>
+
+  <!-- Itens -->
+  <div class="card">
+    <div class="card-title">📦 Itens</div>
+    <div id="lista-itens" class="item-list"></div>
+    <div class="sep"></div>
+    <button class="btn btn-secondary" onclick="abrirItemModal()">➕ Adicionar Item</button>
+    <div class="total-box">
+      <span class="total-label">TOTAL</span>
+      <div style="text-align:right;">
+        <div class="total-valor" id="total-display">R$ 0,00</div>
+        <div style="font-size:10px; opacity:0.7;" id="total-extenso"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Observações -->
+  <div class="card">
+    <div class="card-title">📝 Observações</div>
+    <div class="form-group" style="margin-bottom:0;">
+      <textarea class="form-textarea" id="doc-obs" placeholder="Observações, condições, prazo de entrega, garantia..." style="min-height:90px;"></textarea>
+    </div>
+  </div>
+
+  <!-- Forma de Pagamento (recibo) -->
+  <div class="card" id="card-pagamento" style="display:none;">
+    <div class="card-title">💳 Pagamento</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Forma</label>
+        <select class="form-select" id="pagamento-forma">
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="PIX">PIX</option>
+          <option value="Cartão de Débito">Débito</option>
+          <option value="Cartão de Crédito">Crédito</option>
+          <option value="Transferência">Transferência</option>
+          <option value="Cheque">Cheque</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="pagamento-status">
+          <option value="pago">Pago</option>
+          <option value="pendente">Pendente</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botões finais -->
+  <div class="card">
+    <button class="btn btn-gold" onclick="gerarPDF()">⬇️ Baixar PDF</button>
+    <button class="btn btn-outline" onclick="salvarDocumento()">💾 Salvar</button>
+  </div>
 </div>
 
-<!-- ============================
-     MODAL VER RECIBO
-     ============================ -->
-<div id="modal-view-recibo" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <div id="recibo-content"></div>
-        <button id="btn-download-pdf"><i class="fas fa-download"></i> Baixar PDF</button>
-    </div>
+<!-- ══════════════ PÁGINA: HISTÓRICO ══════════════ -->
+<div id="page-historico" class="page">
+  <div class="card">
+    <div class="card-title">🔍 Buscar</div>
+    <input type="text" class="form-input" id="busca-input" placeholder="Nome, placa, número..." oninput="filtrarDocs()">
+  </div>
+  <div id="lista-historico"></div>
 </div>
 
-<!-- ============================
-     MODAL CRIAR ORÇAMENTO
-     ============================ -->
-<div id="modal-orcamento" class="modal">
-    <div class="modal-content modal-wide">
-        <span class="close-btn">&times;</span>
-        <h2 id="modal-orcamento-titulo" style="color:var(--cor-orcamento); border-color:var(--cor-orcamento);">
-            <i class="fas fa-file-invoice-dollar"></i> Criar Orçamento
-        </h2>
-        <form id="form-orcamento">
-            <input type="hidden" id="orc-id-edicao">
-
-            <div class="orcamento-form-grid">
-                <div>
-                    <label>Empresa/Solicitante:</label>
-                    <input type="text" id="orc-empresa" placeholder="Nome da empresa cliente" required>
-                </div>
-                <div>
-                    <label>CNPJ do Solicitante:</label>
-                    <input type="text" id="orc-cnpj-solicitante" placeholder="Ex: 79.379.491/0182-01">
-                </div>
-                <div>
-                    <label>Data do Orçamento:</label>
-                    <input type="date" id="orc-data" required>
-                </div>
-                <div>
-                    <label>Validade (dias):</label>
-                    <input type="number" id="orc-validade" value="30" min="1">
-                </div>
-                <div class="full">
-                    <label>Observações:</label>
-                    <textarea id="orc-obs" rows="2" placeholder="Ex: Esse orçamento já está incluso tudo, locação de andaimes e todas as outras despesas."></textarea>
-                </div>
-                <div>
-                    <label>Veículo (opcional):</label>
-                    <input type="text" id="orc-veiculo" placeholder="Ex: Ford Fiesta, Gol, HB20...">
-                </div>
-                <div>
-                    <label>Placa (opcional):</label>
-                    <input type="text" id="orc-placa" placeholder="Ex: ABC-1234">
-                </div>
-                <div>
-                    <label>Película (opcional):</label>
-                    <input type="text" id="orc-pelicula" placeholder="Ex: PELÍUCULA ORIGIN DE NANO CERÂMICA">
-                </div>
-                <div>
-                    <label>Condições de Pagamento:</label>
-                    <input type="text" id="orc-pagamento" placeholder="Ex: transferência ou Pix" value="transferência ou Pix">
-                </div>
-                <div>
-                    <label>Cidade/UF para rodapé:</label>
-                    <input type="text" id="orc-cidade" placeholder="Ex: Maceió (AL)" value="Maceió (AL)">
-                </div>
-            </div>
-
-            <div style="margin-top: 10px;">
-                <label style="font-size:1em; color: var(--cor-orcamento);">Itens do Orçamento</label>
-                <div style="font-size:0.78em; color:#888; margin-bottom:8px;">Foto | Descrição | Garantia | Valor | Remover</div>
-                <div id="itens-container"></div>
-                <button type="button" class="btn-add-item" id="btn-add-item" style="margin-top:8px; padding:8px 16px; font-size:0.9em;">
-                    <i class="fas fa-plus"></i> Adicionar Item
-                </button>
-            </div>
-
-            <button type="submit" class="btn-salvar-orcamento" style="margin-top:16px;">
-                <i class="fas fa-eye"></i> Gerar Pré-visualização
-            </button>
-        </form>
+<!-- ══════════════ PÁGINA: EMPRESA ══════════════ -->
+<div id="page-empresa" class="page">
+  <div class="card">
+    <div class="card-title">🏢 Dados da Empresa</div>
+    <div class="form-group">
+      <label class="form-label">Nome da Empresa</label>
+      <input type="text" class="form-input" id="emp-nome" value="Tony Fumê">
     </div>
+    <div class="form-group">
+      <label class="form-label">CNPJ</label>
+      <input type="text" class="form-input" id="emp-cnpj" value="13.949.583/0001-32">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Endereço</label>
+      <input type="text" class="form-input" id="emp-endereco" value="Avenida Juca Sampaio, 1552, Jacintinho">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Telefone</label>
+        <input type="tel" class="form-input" id="emp-telefone" placeholder="(82) 9 0000-0000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" class="form-input" id="emp-email" placeholder="contato@tony.com">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Logo da Empresa</label>
+      <div class="foto-upload" onclick="document.getElementById('logo-input').click()">
+        <input type="file" id="logo-input" accept="image/*" onchange="carregarLogo(this)">
+        <div style="font-size:28px;">🏷️</div>
+        <div class="foto-upload-text">Toque para selecionar logo</div>
+        <img id="logo-preview" class="foto-preview" style="margin-top:8px;">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Validade dos Orçamentos</label>
+      <select class="form-select" id="emp-validade">
+        <option value="15">15 dias</option>
+        <option value="30" selected>30 dias</option>
+        <option value="45">45 dias</option>
+        <option value="60">60 dias</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="salvarEmpresa()">💾 Salvar Dados da Empresa</button>
+  </div>
 </div>
 
-<!-- ============================
-     MODAL VER ORÇAMENTO
-     ============================ -->
-<div id="modal-view-orcamento" class="modal">
-    <div class="modal-content modal-wide">
-        <span class="close-btn">&times;</span>
-        <div id="orcamento-preview"></div>
-        <button id="btn-download-orc-pdf" style="margin-top:12px;">
-            <i class="fas fa-download"></i> Baixar PDF
-        </button>
+<!-- ══════════════ MODAL: ADICIONAR ITEM ══════════════ -->
+<div class="modal-overlay" id="modal-item">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">➕ Novo Item</div>
+    <div class="form-group">
+      <label class="form-label">Descrição *</label>
+      <textarea class="form-textarea" id="item-desc" placeholder="Descreva o item ou serviço com detalhes completos..." style="min-height:80px;"></textarea>
     </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Qtd.</label>
+        <input type="number" class="form-input" id="item-qtd" value="1" min="1" step="1" oninput="calcItemTotal()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preço Unit. (R$)</label>
+        <input type="number" class="form-input" id="item-preco" placeholder="0,00" min="0" step="0.01" oninput="calcItemTotal()">
+      </div>
+    </div>
+    <div class="total-box" style="margin-bottom:12px; padding:10px 14px;">
+      <span class="total-label" style="font-size:12px;">SUBTOTAL</span>
+      <span class="total-valor" id="item-subtotal" style="font-size:16px;">R$ 0,00</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Foto do Item (opcional)</label>
+      <div class="foto-upload" onclick="document.getElementById('item-foto-input').click()">
+        <input type="file" id="item-foto-input" accept="image/*" onchange="carregarFotoItem(this)">
+        <div style="font-size:24px;">📷</div>
+        <div class="foto-upload-text">Toque para adicionar foto</div>
+        <img id="item-foto-preview" class="foto-preview" style="margin-top:8px;">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="adicionarItem()">✅ Adicionar Item</button>
+    <button class="btn btn-secondary" onclick="fecharModal('modal-item')">Cancelar</button>
+  </div>
 </div>
 
-<!-- ============================
-     MODAL PAINEL FINANCEIRO
-     ============================ -->
-<div id="modal-financeiro" class="modal">
-    <div class="modal-content modal-financeiro">
-        <span class="close-btn">&times;</span>
-        <h2 style="color:var(--cor-financeiro); border-color:var(--cor-financeiro);">
-            <i class="fas fa-chart-line"></i> Painel Financeiro
-        </h2>
-
-        <!-- Resumo do mês atual -->
-        <div class="fin-section-title"><i class="fas fa-calendar-alt"></i> Mês Atual</div>
-        <div class="fin-cards" id="fin-cards-mes"></div>
-
-        <!-- Barra de progresso do mês -->
-        <div id="fin-progresso-mes-container" style="margin-bottom:16px;">
-            <div style="display:flex; justify-content:space-between; font-size:0.8em; color:#555; margin-bottom:4px;">
-                <span>Progresso do mês</span>
-                <span id="fin-progresso-label">0%</span>
-            </div>
-            <div class="fin-barra-container">
-                <div class="fin-barra verde" id="fin-progresso-barra" style="width:0%"></div>
-            </div>
-            <div style="font-size:0.75em; color:#777; margin-top:3px;" id="fin-progresso-text"></div>
-        </div>
-
-        <!-- Projeção -->
-        <div class="fin-projecao-box" id="fin-projecao-box">
-            <h3><i class="fas fa-chart-bar"></i> PROJEÇÃO PARA O FINAL DO MÊS</h3>
-            <div class="fin-projecao-grid" id="fin-projecao-grid"></div>
-        </div>
-
-        <!-- Alerta de tendência -->
-        <div id="fin-alerta-tendencia"></div>
-
-        <!-- Histórico 3 meses -->
-        <div class="fin-section-title"><i class="fas fa-history"></i> Histórico dos Últimos 3 Meses</div>
-        <div id="fin-grafico-meses"></div>
-
-        <!-- Orçamentos pendentes/aceitos -->
-        <div class="fin-section-title"><i class="fas fa-file-invoice-dollar"></i> Orçamentos em Aberto</div>
-        <div id="fin-orcamentos-abertos">
-            <table style="margin-top:0;">
-                <thead>
-                    <tr>
-                        <th>Nº</th>
-                        <th>Cliente</th>
-                        <th>Valor</th>
-                        <th>Data</th>
-                        <th>Status</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody id="fin-orc-abertos-body"></tbody>
-            </table>
-            <div id="fin-orc-abertos-total" style="margin-top:10px; font-size:0.9em;"></div>
-        </div>
-
-        <!-- Capitalização -->
-        <div class="fin-section-title"><i class="fas fa-piggy-bank"></i> Capitalização & Reserva</div>
-        <div id="fin-alerta-cap"></div>
-
-        <div style="margin-bottom:12px; font-size:0.85em; color:#444; line-height:1.6;">
-            Configure os percentuais que deseja aportar sobre a receita realizada para construir sua reserva de emergência e seu capital de giro.
-        </div>
-
-        <div style="background:#f8f8f8; border-radius:8px; padding:14px; margin-bottom:14px; border:1px solid #e0e0e0;">
-            <div style="margin-bottom:10px;">
-                <label style="font-weight:bold; font-size:0.85em; color:#c97d00;">🛡️ Reserva de Emergência — recomendado: 10-20%</label>
-                <div class="fin-slider-container">
-                    <input type="range" id="slider-reserva" min="0" max="40" value="15" step="1" oninput="atualizarCapitalizacao()">
-                    <span id="val-reserva">15%</span>
-                </div>
-            </div>
-            <div>
-                <label style="font-weight:bold; font-size:0.85em; color:#1a3a6b;">🔄 Capital de Giro — recomendado: 10-30%</label>
-                <div class="fin-slider-container">
-                    <input type="range" id="slider-capital" min="0" max="50" value="20" step="1" oninput="atualizarCapitalizacao()">
-                    <span id="val-capital">20%</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="fin-cap-grid" id="fin-cap-grid"></div>
-
-        <div id="fin-cap-conselho" style="margin-top:14px;"></div>
-    </div>
+<!-- ══════════════ MODAL: VISUALIZAR DOCUMENTO ══════════════ -->
+<div class="modal-overlay" id="modal-doc">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-doc-title">Documento</div>
+    <div id="modal-doc-content"></div>
+    <button class="btn btn-gold" id="btn-baixar-doc" onclick="">⬇️ Baixar PDF</button>
+    <button class="btn btn-secondary" onclick="fecharModal('modal-doc')">Fechar</button>
+  </div>
 </div>
 
-<footer>
-    <p>Desenvolvedor - Alex Peixoto - (82)99662-2036</p>
-</footer>
+<!-- ══════════════ MODAL: CONFIG ══════════════ -->
+<div class="modal-overlay" id="modal-config">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙️ Configurações</div>
+    <div class="alerta">⚠️ Esta ação irá apagar todo o histórico!</div>
+    <button class="btn btn-danger" onclick="limparTudo()">🗑️ Limpar todos os dados</button>
+    <button class="btn btn-secondary" onclick="fecharModal('modal-config')">Fechar</button>
+  </div>
+</div>
 
-<script src="https://unpkg.com/@danielgatis/rembg-browser"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- TEMPLATE PDF (escondido) -->
+<div id="pdf-template"></div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Gerando PDF...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-// ============================================================
-// ELEMENTOS
-// ============================================================
-const btnConfig = document.getElementById('btn-config');
-const btnAddRecibo = document.getElementById('btn-add-recibo');
-const btnAddCliente = document.getElementById('btn-add-cliente');
-const btnAddOrcamento = document.getElementById('btn-add-orcamento');
-const btnDownloadPdf = document.getElementById('btn-download-pdf');
-const btnDownloadOrcPdf = document.getElementById('btn-download-orc-pdf');
-const btnPainelFinanceiro = document.getElementById('btn-painel-financeiro');
+// ══════════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════════
+let tipoDoc = 'orcamento';
+let itens = [];
+let fotoItemAtual = null;
+let documentos = [];
+let docAtualIndex = null;
 
-const modalConfig = document.getElementById('modal-config');
-const modalRecibo = document.getElementById('modal-recibo');
-const modalCliente = document.getElementById('modal-cliente');
-const modalViewRecibo = document.getElementById('modal-view-recibo');
-const modalOrcamento = document.getElementById('modal-orcamento');
-const modalViewOrcamento = document.getElementById('modal-view-orcamento');
-const modalFinanceiro = document.getElementById('modal-financeiro');
-
-const formConfig = document.getElementById('form-config');
-const formRecibo = document.getElementById('form-recibo');
-const formCliente = document.getElementById('form-cliente');
-const formOrcamento = document.getElementById('form-orcamento');
-
-const tabelaRecibosBody = document.querySelector('#tabela-recibos tbody');
-const tabelaClientesBody = document.querySelector('#tabela-clientes tbody');
-const tabelaOrcamentosBody = document.querySelector('#tabela-orcamentos tbody');
-const reciboContent = document.getElementById('recibo-content');
-const orcamentoPreview = document.getElementById('orcamento-preview');
-const loadingMessage = document.getElementById('loading-message');
-const itensContainer = document.getElementById('itens-container');
-
-// ============================================================
-// STATE
-// ============================================================
-let rembgInstance = null;
-
-let empresaConfig = JSON.parse(localStorage.getItem('empresaConfig')) || {
-    nomeEmpresa: 'Tony Fumê',
-    cnpj: '13.949.583/0001-32',
-    instagram: '@tonyfume',
-    endereco: 'Avenida Juca Sampaio, 1552, Jacintinho',
-    whatsapp: '(82)99806-9585',
-    responsavel: '',
-    cargo: '',
-    pix: '',
-    logo: null,
-    background: null
+// ══════════════════════════════════════════
+// INICIALIZAÇÃO
+// ══════════════════════════════════════════
+window.onload = function() {
+  carregarDados();
+  renderHistorico();
+  carregarEmpresa();
+  gerarNumeroAuto();
 };
 
-let recibos = JSON.parse(localStorage.getItem('recibos')) || [];
-let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-let orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
-
-let proximoReciboId = recibos.length > 0 ? Math.max(...recibos.map(r => r.id)) + 1 : 1;
-let proximoClienteId = clientes.length > 0 ? Math.max(...clientes.map(c => c.id)) + 1 : 1;
-let proximoOrcamentoId = orcamentos.length > 0 ? Math.max(...orcamentos.map(o => o.id)) + 1 : 1;
-
-// ============================================================
-// MODAL HELPERS
-// ============================================================
-function abrirModal(modal) { modal.style.display = 'block'; }
-function fecharModal(modal) { modal.style.display = 'none'; }
-
-window.onclick = (e) => {
-    if (e.target.classList.contains('modal')) fecharModal(e.target);
-};
-
-document.querySelectorAll('.close-btn').forEach(btn => {
-    btn.onclick = () => fecharModal(btn.closest('.modal'));
-});
-
-// ============================================================
-// TABS
-// ============================================================
-function trocarTab(tabId, btn, isOrcamento) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.classList.remove('active-blue'); });
-    document.getElementById(tabId).classList.add('active');
-    btn.classList.add('active');
-    if (isOrcamento) btn.classList.add('active-blue');
+function carregarDados() {
+  try {
+    documentos = JSON.parse(localStorage.getItem('tf_documentos') || '[]');
+  } catch(e) { documentos = []; }
 }
 
-// ============================================================
-// FORMATAÇÃO
-// ============================================================
-function formatarMoeda(v) {
-    return parseFloat(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+function salvarDados() {
+  localStorage.setItem('tf_documentos', JSON.stringify(documentos));
 }
 
-function formatarData(ds) {
-    if (!ds) return '';
-    const [y, m, d] = ds.split('-');
-    return `${d}/${m}/${y}`;
+function carregarEmpresa() {
+  const emp = JSON.parse(localStorage.getItem('tf_empresa') || '{}');
+  if (emp.nome) document.getElementById('emp-nome').value = emp.nome;
+  if (emp.cnpj) document.getElementById('emp-cnpj').value = emp.cnpj;
+  if (emp.endereco) document.getElementById('emp-endereco').value = emp.endereco;
+  if (emp.telefone) document.getElementById('emp-telefone').value = emp.telefone;
+  if (emp.email) document.getElementById('emp-email').value = emp.email;
+  if (emp.validade) document.getElementById('emp-validade').value = emp.validade;
+  if (emp.logo) {
+    document.getElementById('logo-preview').src = emp.logo;
+    document.getElementById('logo-preview').style.display = 'block';
+  }
 }
 
-function dataExtenso(ds) {
-    if (!ds) return '';
-    const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-    const [y, m, d] = ds.split('-');
-    return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
+function salvarEmpresa() {
+  const emp = {
+    nome: document.getElementById('emp-nome').value,
+    cnpj: document.getElementById('emp-cnpj').value,
+    endereco: document.getElementById('emp-endereco').value,
+    telefone: document.getElementById('emp-telefone').value,
+    email: document.getElementById('emp-email').value,
+    validade: document.getElementById('emp-validade').value,
+    logo: document.getElementById('logo-preview').src || ''
+  };
+  localStorage.setItem('tf_empresa', JSON.stringify(emp));
+  showToast('✅ Dados da empresa salvos!');
 }
 
-function valorExtenso(v) {
-    const n = parseFloat(v);
-    if (isNaN(n)) return '';
-    const inteiro = Math.floor(n);
-    const centavos = Math.round((n - inteiro) * 100);
-    
-    const unidades = ['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
-    const dezenas = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
-    const centenas = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
-
-    function converterMenorQue1000(num) {
-        if (num === 0) return '';
-        if (num === 100) return 'cem';
-        let result = '';
-        const c = Math.floor(num / 100);
-        const resto = num % 100;
-        if (c > 0) result += centenas[c];
-        if (c > 0 && resto > 0) result += ' e ';
-        if (resto > 0 && resto < 20) {
-            result += unidades[resto];
-        } else if (resto >= 20) {
-            const d = Math.floor(resto / 10);
-            const u = resto % 10;
-            result += dezenas[d];
-            if (u > 0) result += ' e ' + unidades[u];
-        }
-        return result;
-    }
-
-    let texto = '';
-    if (inteiro === 0) {
-        texto = 'zero';
-    } else if (inteiro < 1000) {
-        texto = converterMenorQue1000(inteiro) + (inteiro === 1 ? ' real' : ' reais');
-    } else if (inteiro < 1000000) {
-        const mil = Math.floor(inteiro / 1000);
-        const resto = inteiro % 1000;
-        texto = (mil === 1 ? 'mil' : converterMenorQue1000(mil) + ' mil');
-        if (resto > 0) texto += ' e ' + converterMenorQue1000(resto);
-        texto += ' reais';
-    } else {
-        const milh = Math.floor(inteiro / 1000000);
-        const resto = inteiro % 1000000;
-        texto = converterMenorQue1000(milh) + (milh === 1 ? ' milhão' : ' milhões');
-        if (resto > 0) texto += ' e ' + converterMenorQue1000(resto);
-        texto += ' reais';
-    }
-
-    if (centavos > 0) texto += ' e ' + (centavos < 20 ? unidades[centavos] : dezenas[Math.floor(centavos/10)] + (centavos%10 > 0 ? ' e ' + unidades[centavos%10] : '')) + (centavos === 1 ? ' centavo' : ' centavos');
-
-    return texto.charAt(0).toUpperCase() + texto.slice(1);
+function gerarNumeroAuto() {
+  const ultimo = documentos.length > 0 ? documentos.length + 1 : 1;
+  document.getElementById('doc-numero').value = String(ultimo).padStart(4, '0');
 }
 
-// ============================================================
-// CONFIGURAÇÕES + LOGO/BG APLICADOS GLOBALMENTE
-// ============================================================
-async function loadRembg() {
-    loadingMessage.textContent = 'Carregando removedor de fundo...';
-    loadingMessage.style.display = 'block';
-    rembgInstance = await rembg.load();
-    loadingMessage.style.display = 'none';
+// ══════════════════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════════════════
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'historico') renderHistorico();
 }
 
-function aplicarIdentidadeVisual() {
-    // Header logo
-    const logoEl = document.getElementById('logo');
-    if (empresaConfig.logo) {
-        logoEl.src = empresaConfig.logo;
-        logoEl.style.display = 'block';
-    } else {
-        logoEl.style.display = 'none';
-    }
-
-    // Header background
-    const headerBg = document.getElementById('header-bg');
-    if (empresaConfig.background) {
-        headerBg.src = empresaConfig.background;
-        headerBg.style.display = 'block';
-    } else {
-        headerBg.style.display = 'none';
-    }
-
-    // Título do sistema
-    if (empresaConfig.nomeEmpresa) {
-        document.getElementById('titulo-sistema').textContent = empresaConfig.nomeEmpresa;
-    }
+// ══════════════════════════════════════════
+// TIPO DE DOCUMENTO
+// ══════════════════════════════════════════
+function setTipo(tipo) {
+  tipoDoc = tipo;
+  const btnOrc = document.getElementById('btn-tipo-orc');
+  const btnRec = document.getElementById('btn-tipo-rec');
+  const cardPag = document.getElementById('card-pagamento');
+  if (tipo === 'orcamento') {
+    btnOrc.className = 'btn btn-primary';
+    btnRec.className = 'btn btn-secondary';
+    cardPag.style.display = 'none';
+  } else {
+    btnOrc.className = 'btn btn-secondary';
+    btnRec.className = 'btn btn-primary';
+    cardPag.style.display = 'block';
+  }
 }
 
-function carregarConfiguracoes() {
-    document.getElementById('config-nome-empresa').value = empresaConfig.nomeEmpresa || '';
-    document.getElementById('config-cnpj').value = empresaConfig.cnpj || '';
-    document.getElementById('config-instagram').value = empresaConfig.instagram || '';
-    document.getElementById('config-endereco').value = empresaConfig.endereco || '';
-    document.getElementById('config-whatsapp').value = empresaConfig.whatsapp || '';
-    document.getElementById('config-responsavel').value = empresaConfig.responsavel || '';
-    document.getElementById('config-cargo').value = empresaConfig.cargo || '';
-    document.getElementById('config-pix').value = empresaConfig.pix || '';
-    aplicarIdentidadeVisual();
-    // Mostra preview da logo se já estiver salva
-    if (empresaConfig.logo) atualizarPreviewLogo(empresaConfig.logo);
+// ══════════════════════════════════════════
+// ITENS
+// ══════════════════════════════════════════
+function abrirItemModal() {
+  document.getElementById('item-desc').value = '';
+  document.getElementById('item-qtd').value = '1';
+  document.getElementById('item-preco').value = '';
+  document.getElementById('item-subtotal').textContent = 'R$ 0,00';
+  document.getElementById('item-foto-preview').style.display = 'none';
+  fotoItemAtual = null;
+  document.getElementById('modal-item').classList.add('open');
 }
 
-function salvarConfiguracoes() {
-    empresaConfig.nomeEmpresa = document.getElementById('config-nome-empresa').value;
-    empresaConfig.cnpj = document.getElementById('config-cnpj').value;
-    empresaConfig.instagram = document.getElementById('config-instagram').value;
-    empresaConfig.endereco = document.getElementById('config-endereco').value;
-    empresaConfig.whatsapp = document.getElementById('config-whatsapp').value;
-    empresaConfig.responsavel = document.getElementById('config-responsavel').value;
-    empresaConfig.cargo = document.getElementById('config-cargo').value;
-    empresaConfig.pix = document.getElementById('config-pix').value;
-    localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
-    carregarConfiguracoes();
-    fecharModal(modalConfig);
+function calcItemTotal() {
+  const qtd = parseFloat(document.getElementById('item-qtd').value) || 0;
+  const preco = parseFloat(document.getElementById('item-preco').value) || 0;
+  const sub = qtd * preco;
+  document.getElementById('item-subtotal').textContent = formatMoeda(sub);
 }
 
-formConfig.addEventListener('submit', (e) => { e.preventDefault(); salvarConfiguracoes(); });
-
-document.getElementById('config-logo').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const usarRembg = document.getElementById('config-logo-rembg').checked;
-
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-        if (!usarRembg) {
-            // Salva direto sem remover fundo
-            empresaConfig.logo = ev.target.result;
-            localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
-            aplicarIdentidadeVisual();
-            atualizarPreviewLogo(ev.target.result);
-            return;
-        }
-
-        loadingMessage.textContent = 'Removendo fundo da logo...';
-        loadingMessage.style.display = 'block';
-
-        try {
-            const img = new Image();
-            img.onload = async () => {
-                try {
-                    if (!rembgInstance) {
-                        loadingMessage.textContent = 'Carregando removedor de fundo...';
-                        rembgInstance = await rembg.load();
-                    }
-                    const output = await rembgInstance.remove(img);
-                    empresaConfig.logo = output.toDataURL('image/png');
-                } catch (err) {
-                    console.warn('Rembg falhou, salvando logo sem remoção de fundo:', err);
-                    empresaConfig.logo = ev.target.result;
-                }
-                localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
-                loadingMessage.style.display = 'none';
-                aplicarIdentidadeVisual();
-                atualizarPreviewLogo(empresaConfig.logo);
-            };
-            img.src = ev.target.result;
-        } catch (err) {
-            console.warn('Erro ao processar logo, salvando original:', err);
-            empresaConfig.logo = ev.target.result;
-            localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
-            loadingMessage.style.display = 'none';
-            aplicarIdentidadeVisual();
-            atualizarPreviewLogo(ev.target.result);
-        }
-    };
-    reader.readAsDataURL(file);
-});
-
-function atualizarPreviewLogo(src) {
-    const container = document.getElementById('logo-preview-container');
-    const img = document.getElementById('logo-preview');
-    if (src) {
-        img.src = src;
-        container.style.display = 'block';
-    } else {
-        container.style.display = 'none';
-    }
+function adicionarItem() {
+  const desc = document.getElementById('item-desc').value.trim();
+  const qtd = parseFloat(document.getElementById('item-qtd').value) || 1;
+  const preco = parseFloat(document.getElementById('item-preco').value) || 0;
+  if (!desc) { showToast('⚠️ Informe a descrição do item'); return; }
+  itens.push({ desc, qtd, preco, total: qtd * preco, foto: fotoItemAtual });
+  fotoItemAtual = null;
+  fecharModal('modal-item');
+  renderItens();
+  calcTotal();
 }
 
-document.getElementById('btn-remover-logo').addEventListener('click', () => {
-    empresaConfig.logo = null;
-    localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
-    aplicarIdentidadeVisual();
-    atualizarPreviewLogo(null);
-    document.getElementById('config-logo').value = '';
-});
+function removerItem(idx) {
+  itens.splice(idx, 1);
+  renderItens();
+  calcTotal();
+}
 
-document.getElementById('config-background').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        empresaConfig.background = ev.target.result;
-        localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
-        aplicarIdentidadeVisual();
-    };
-    reader.readAsDataURL(file);
-});
+function renderItens() {
+  const lista = document.getElementById('lista-itens');
+  if (itens.length === 0) {
+    lista.innerHTML = '<p style="font-size:13px; color:var(--cinza); text-align:center; padding:12px;">Nenhum item adicionado</p>';
+    return;
+  }
+  lista.innerHTML = itens.map((item, i) => `
+    <div class="item-card">
+      <button class="btn-remove" onclick="removerItem(${i})">×</button>
+      ${item.foto ? `<img src="${item.foto}" style="width:100%; max-height:100px; object-fit:cover; border-radius:6px; margin-bottom:8px;">` : ''}
+      <div class="item-header">
+        <div class="item-desc" style="padding-right:24px;">${escHtml(item.desc)}</div>
+      </div>
+      <div class="item-sub">${item.qtd}x ${formatMoeda(item.preco)} = <strong style="color:var(--verde);">${formatMoeda(item.total)}</strong></div>
+    </div>
+  `).join('');
+}
 
-btnConfig.addEventListener('click', () => { abrirModal(modalConfig); });
+function calcTotal() {
+  const total = itens.reduce((s, i) => s + i.total, 0);
+  document.getElementById('total-display').textContent = formatMoeda(total);
+  document.getElementById('total-extenso').textContent = valorPorExtenso(total);
+}
 
-// ============================================================
-// CLIENTES
-// ============================================================
-function renderizarClientes() {
-    tabelaClientesBody.innerHTML = '';
-    const selectCliente = document.getElementById('recibo-cliente');
-    selectCliente.innerHTML = '<option value="" disabled selected>Selecione um cliente</option>';
-
-    clientes.forEach(c => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${c.nome}</td><td>${c.telefone || '-'}</td>
-            <td>
-                <button class="btn-acao" onclick="editarCliente(${c.id})"><i class="fas fa-edit"></i></button>
-                <button class="btn-acao" onclick="excluirCliente(${c.id})"><i class="fas fa-trash-alt"></i></button>
-            </td>`;
-        tabelaClientesBody.appendChild(tr);
-
-        const opt = document.createElement('option');
-        opt.value = c.id;
-        opt.textContent = c.nome;
-        selectCliente.appendChild(opt);
+function carregarFotoItem(input) {
+  const file = input.files[0];
+  if (!file) return;
+  // Comprimir imagem antes de armazenar
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    comprimirImagem(e.target.result, 400, 0.75, function(compressed) {
+      fotoItemAtual = compressed;
+      const preview = document.getElementById('item-foto-preview');
+      preview.src = compressed;
+      preview.style.display = 'block';
     });
-
-    document.getElementById('total-clientes').textContent = clientes.length;
+  };
+  reader.readAsDataURL(file);
 }
 
-function salvarCliente(c) {
-    const idx = clientes.findIndex(x => x.id === c.id);
-    if (idx > -1) clientes[idx] = c;
-    else { c.id = proximoClienteId++; clientes.push(c); }
-    localStorage.setItem('clientes', JSON.stringify(clientes));
-    renderizarClientes();
-    fecharModal(modalCliente);
-}
-
-function editarCliente(id) {
-    const c = clientes.find(x => x.id === id);
-    if (!c) return;
-    document.getElementById('modal-cliente-titulo').textContent = 'Editar Cliente';
-    document.getElementById('cliente-id-edicao').value = c.id;
-    document.getElementById('cliente-nome').value = c.nome;
-    document.getElementById('cliente-telefone').value = c.telefone || '';
-    document.getElementById('cliente-cnpj').value = c.cnpj || '';
-    abrirModal(modalCliente);
-}
-
-function excluirCliente(id) {
-    if (confirm('Excluir este cliente?')) {
-        clientes = clientes.filter(c => c.id !== id);
-        localStorage.setItem('clientes', JSON.stringify(clientes));
-        renderizarClientes();
-    }
-}
-
-formCliente.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const c = {
-        id: document.getElementById('cliente-id-edicao').value ? parseInt(document.getElementById('cliente-id-edicao').value) : null,
-        nome: document.getElementById('cliente-nome').value,
-        telefone: document.getElementById('cliente-telefone').value,
-        cnpj: document.getElementById('cliente-cnpj').value,
-    };
-    salvarCliente(c);
-    e.target.reset();
-});
-
-btnAddCliente.addEventListener('click', () => {
-    document.getElementById('modal-cliente-titulo').textContent = 'Cadastrar Novo Cliente';
-    document.getElementById('cliente-id-edicao').value = '';
-    formCliente.reset();
-    abrirModal(modalCliente);
-});
-
-// ============================================================
-// RECIBOS
-// ============================================================
-function renderizarRecibos() {
-    tabelaRecibosBody.innerHTML = '';
-    let total = 0;
-
-    recibos.forEach(r => {
-        const c = clientes.find(x => x.id === r.clienteId);
-        if (!c) return;
-        total += parseFloat(r.valor);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${r.id}</td>
-            <td>${c.nome}</td>
-            <td>${formatarMoeda(r.valor)}</td>
-            <td>${formatarData(r.data)}</td>
-            <td>
-                <button class="btn-acao" title="Visualizar" onclick="visualizarRecibo(${r.id})"><i class="fas fa-eye"></i></button>
-                <button class="btn-acao" title="Editar" onclick="editarRecibo(${r.id})"><i class="fas fa-edit"></i></button>
-                <button class="btn-acao" title="Excluir" onclick="excluirRecibo(${r.id})"><i class="fas fa-trash-alt"></i></button>
-            </td>`;
-        tabelaRecibosBody.appendChild(tr);
+function carregarLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    comprimirImagem(e.target.result, 300, 0.85, function(compressed) {
+      const preview = document.getElementById('logo-preview');
+      preview.src = compressed;
+      preview.style.display = 'block';
     });
-
-    document.getElementById('total-recibos').textContent = recibos.length;
-    document.getElementById('valor-total').textContent = formatarMoeda(total);
-
-    // atualiza card de receita do mês no resumo
-    const hoje = new Date();
-    const mesMes = hoje.getMonth(), anoMes = hoje.getFullYear();
-    const receitaMes = recibos.filter(r => {
-        const d = new Date(r.data + 'T12:00:00');
-        return d.getMonth() === mesMes && d.getFullYear() === anoMes;
-    }).reduce((s, r) => s + parseFloat(r.valor), 0);
-    document.getElementById('receita-mes-resumo').textContent = formatarMoeda(receitaMes);
+  };
+  reader.readAsDataURL(file);
 }
 
-function salvarRecibo(r) {
-    const idx = recibos.findIndex(x => x.id === r.id);
-    if (idx > -1) recibos[idx] = r;
-    else { r.id = proximoReciboId++; recibos.push(r); }
-    localStorage.setItem('recibos', JSON.stringify(recibos));
-    renderizarRecibos();
-    return r.id;
+function comprimirImagem(dataUrl, maxWidth, quality, callback) {
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    let w = img.width, h = img.height;
+    if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    callback(canvas.toDataURL('image/jpeg', quality));
+  };
+  img.src = dataUrl;
 }
 
-function visualizarRecibo(id, baixarAuto = false) {
-    const r = recibos.find(x => x.id === id);
-    const c = clientes.find(x => x.id === r.clienteId);
-    
-    const bgHtml = empresaConfig.background
-        ? `<img class="recibo-bg-img" src="${empresaConfig.background}" alt="">`
-        : '';
-    const logoHtml = empresaConfig.logo
-        ? `<img src="${empresaConfig.logo}" alt="Logo">`
-        : '';
-
-    reciboContent.innerHTML = `
-        ${bgHtml}
-        <div class="recibo-content-inner">
-            <div class="recibo-header">
-                ${logoHtml}
-                <h3>RECIBO DE SERVIÇO</h3>
-            </div>
-            <div class="recibo-body">
-                <div class="recibo-info-grid">
-                    <div class="recibo-info-box"><h4>Recebemos de:</h4><p>${c.nome}</p></div>
-                    <div class="recibo-info-box"><h4>Valor:</h4><p>${formatarMoeda(r.valor)}</p></div>
-                    <div class="recibo-info-box"><h4>Serviço referente:</h4><p>${r.servico}</p></div>
-                    <div class="recibo-info-box"><h4>Data:</h4><p>${formatarData(r.data)}</p></div>
-                </div>
-                <div class="recibo-assinatura">
-                    <div class="linha-assinatura"></div>
-                    <p>Assinatura do Responsável</p>
-                    <p>${empresaConfig.instagram}</p>
-                </div>
-            </div>
-            <div class="recibo-footer">
-                <div class="contato-container">
-                    <div class="contato-item"><i class="fas fa-phone"></i><p>${empresaConfig.whatsapp}</p></div>
-                </div>
-                <p><strong>CNPJ:</strong> ${empresaConfig.cnpj}</p>
-                <p>${empresaConfig.endereco}</p>
-            </div>
-        </div>`;
-    abrirModal(modalViewRecibo);
-    if (baixarAuto) setTimeout(baixarReciboPdf, 500);
+// ══════════════════════════════════════════
+// SALVAR DOCUMENTO
+// ══════════════════════════════════════════
+function salvarDocumento() {
+  if (itens.length === 0) { showToast('⚠️ Adicione pelo menos um item'); return; }
+  const doc = coletarDadosDoc();
+  if (docAtualIndex !== null) {
+    documentos[docAtualIndex] = doc;
+  } else {
+    documentos.unshift(doc);
+  }
+  salvarDados();
+  showToast('✅ Documento salvo com sucesso!');
+  limparFormulario();
 }
 
-function editarRecibo(id) {
-    const r = recibos.find(x => x.id === id);
-    if (!r) return;
-    document.getElementById('modal-recibo-titulo').textContent = 'Editar Recibo';
-    document.getElementById('recibo-id-edicao').value = r.id;
-    document.getElementById('recibo-cliente').value = r.clienteId;
-    document.getElementById('recibo-servico').value = r.servico;
-    document.getElementById('recibo-valor').value = r.valor;
-    document.getElementById('recibo-data').value = r.data;
-    document.getElementById('btn-salvar-recibo').textContent = 'Salvar Recibo';
-    abrirModal(modalRecibo);
+function coletarDadosDoc() {
+  const emp = JSON.parse(localStorage.getItem('tf_empresa') || '{}');
+  const total = itens.reduce((s, i) => s + i.total, 0);
+  return {
+    id: Date.now(),
+    tipo: tipoDoc,
+    numero: document.getElementById('doc-numero').value,
+    data: new Date().toLocaleDateString('pt-BR'),
+    cliente: { nome: document.getElementById('cliente-nome').value, doc: document.getElementById('cliente-doc').value },
+    veiculo: {
+      modelo: document.getElementById('veiculo-modelo').value,
+      placa: document.getElementById('veiculo-placa').value,
+      pelicula: document.getElementById('veiculo-pelicula').value
+    },
+    itens: [...itens],
+    total,
+    obs: document.getElementById('doc-obs').value,
+    pagamento: {
+      forma: document.getElementById('pagamento-forma') ? document.getElementById('pagamento-forma').value : '',
+      status: document.getElementById('pagamento-status') ? document.getElementById('pagamento-status').value : ''
+    },
+    empresa: emp
+  };
 }
 
-function excluirRecibo(id) {
-    if (confirm('Excluir este recibo?')) {
-        recibos = recibos.filter(r => r.id !== id);
-        localStorage.setItem('recibos', JSON.stringify(recibos));
-        renderizarRecibos();
-    }
+function limparFormulario() {
+  ['cliente-nome','cliente-doc','veiculo-modelo','veiculo-placa','veiculo-pelicula','doc-obs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  itens = [];
+  docAtualIndex = null;
+  renderItens();
+  calcTotal();
+  gerarNumeroAuto();
 }
 
-formRecibo.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const r = {
-        id: document.getElementById('recibo-id-edicao').value ? parseInt(document.getElementById('recibo-id-edicao').value) : null,
-        clienteId: parseInt(document.getElementById('recibo-cliente').value),
-        servico: document.getElementById('recibo-servico').value,
-        valor: parseFloat(document.getElementById('recibo-valor').value),
-        data: document.getElementById('recibo-data').value,
-    };
-    const newId = salvarRecibo(r);
-    e.target.reset();
-    document.getElementById('recibo-id-edicao').value = '';
-    document.getElementById('btn-salvar-recibo').textContent = 'Baixar Recibo';
-    fecharModal(modalRecibo);
-    visualizarRecibo(newId, true);
-});
-
-btnAddRecibo.addEventListener('click', () => {
-    document.getElementById('modal-recibo-titulo').textContent = 'Criar Novo Recibo';
-    document.getElementById('recibo-id-edicao').value = '';
-    document.getElementById('btn-salvar-recibo').textContent = 'Baixar Recibo';
-    formRecibo.reset();
-    abrirModal(modalRecibo);
-});
-
-function baixarReciboPdf() {
-    window.jsPDF = window.jspdf.jsPDF;
-    const element = document.getElementById('recibo-content');
-    if (!element) return;
-
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;width:560px;background:#fff;z-index:-1;visibility:hidden;pointer-events:none;';
-    const clone = element.cloneNode(true);
-    clone.style.cssText = 'width:560px;min-width:560px;border:none;margin:0;overflow:visible;';
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
-
-    btnDownloadPdf.disabled = true;
-    btnDownloadPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando PDF...';
-    html2canvas(clone, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: 560,
-        windowWidth: 560
-    }).then(canvas => {
-        document.body.removeChild(wrapper);
-        const doc = new jsPDF('p', 'pt', 'a4');
-        const imgData = canvas.toDataURL('image/png');
-        const pageW = 595.28;
-        const pageH = 841.89;
-        const margin = 20;
-        const usableW = pageW - 2 * margin;
-        const usableH = pageH - 2 * margin;
-        const aspect = canvas.height / canvas.width;
-        let drawW = usableW;
-        let drawH = usableW * aspect;
-        if (drawH > usableH) { drawH = usableH; drawW = usableH / aspect; }
-        const xOffset = margin + (usableW - drawW) / 2;
-        doc.addImage(imgData, 'PNG', xOffset, margin, drawW, drawH);
-        doc.save('recibo.pdf');
-        btnDownloadPdf.disabled = false;
-        btnDownloadPdf.innerHTML = '<i class="fas fa-download"></i> Baixar PDF';
-        fecharModal(modalViewRecibo);
-    }).catch(err => {
-        document.body.removeChild(wrapper);
-        btnDownloadPdf.disabled = false;
-        btnDownloadPdf.innerHTML = '<i class="fas fa-download"></i> Baixar PDF';
-        alert('Erro ao gerar PDF. Tente novamente.');
-    });
-}
-
-btnDownloadPdf.onclick = baixarReciboPdf;
-
-// ============================================================
-// ORÇAMENTOS
-// ============================================================
-let itensFotos = {};
-
-function adicionarItemOrcamento(item) {
-    const idx = itensContainer.children.length;
-    const div = document.createElement('div');
-    div.className = 'item-orcamento-row';
-    div.dataset.idx = idx;
-
-    div.innerHTML = `
-        <div>
-            <label class="img-upload-label" for="item-foto-${idx}">
-                <i class="fas fa-image"></i><br>Foto
-            </label>
-            <input type="file" id="item-foto-${idx}" accept="image/*" style="display:none;" onchange="carregarFotoItem(this, ${idx})">
-            <img id="item-foto-preview-${idx}" class="item-img-preview" style="display:none;" src="">
-        </div>
-        <textarea placeholder="Descrição do produto/serviço&#10;Ex: Aplicação de película nano cerâmica&#10;Medidas: 8,80m x 2,65m">${item ? item.descricao : ''}</textarea>
-        <input type="text" placeholder="Garantia&#10;Ex: 10 anos" value="${item ? item.garantia : ''}">
-        <input type="text" placeholder="Valor&#10;Ex: R$ 53.900,00" value="${item ? item.valor : ''}">
-        <button type="button" class="btn-remover-item" onclick="removerItem(this)"><i class="fas fa-times"></i></button>`;
-
-    if (item && item.foto) {
-        itensFotos[idx] = item.foto;
-        const img = div.querySelector(`#item-foto-preview-${idx}`);
-        img.src = item.foto;
-        img.style.display = 'block';
-    }
-
-    itensContainer.appendChild(div);
-}
-
-function carregarFotoItem(input, idx) {
-    if (!input.files[0]) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        itensFotos[idx] = e.target.result;
-        const img = document.getElementById(`item-foto-preview-${idx}`);
-        img.src = e.target.result;
-        img.style.display = 'block';
-    };
-    reader.readAsDataURL(input.files[0]);
-}
-
-function removerItem(btn) { btn.closest('.item-orcamento-row').remove(); }
-
-document.getElementById('btn-add-item').addEventListener('click', () => adicionarItemOrcamento(null));
-
-function coletarItens() {
-    const rows = itensContainer.querySelectorAll('.item-orcamento-row');
-    return Array.from(rows).map((row) => {
-        const origIdx = parseInt(row.dataset.idx);
-        return {
-            descricao: row.querySelector('textarea').value,
-            garantia: row.querySelectorAll('input[type=text]')[0].value,
-            valor: row.querySelectorAll('input[type=text]')[1].value,
-            foto: itensFotos[origIdx] || null
-        };
-    });
-}
-
-function calcularTotalOrcamento(itens) {
-    let total = 0;
-    itens.forEach(item => {
-        const v = item.valor.replace(/[R$\s.]/g, '').replace(',', '.');
-        const n = parseFloat(v);
-        if (!isNaN(n)) total += n;
-    });
-    return total;
-}
-
-function gerarHTMLOrcamento(orc) {
-    const total = calcularTotalOrcamento(orc.itens);
-    const totalFormatado = formatarMoeda(total);
-    const totalExtenso = valorExtenso(total);
-
-    // ── Logo ──────────────────────────────────────────
-    const logoHtml = empresaConfig.logo
-        ? `<img src="${empresaConfig.logo}" alt="Logo">`
-        : `<div class="orc-logo-placeholder">Logo</div>`;
-
-    // ── Imagem de fundo opcional ──────────────────────
-    const bgHtml = empresaConfig.background
-        ? `<img class="orc-bg-img" src="${empresaConfig.background}" alt="">`
-        : '';
-
-    // ── Linhas de itens ───────────────────────────────
-    const itensHTML = orc.itens.map(item => {
-        const fotoCell = item.foto
-            ? `<img src="${item.foto}" style="max-width:58px;max-height:54px;object-fit:contain;">`
-            : `<div class="sem-foto">sem foto</div>`;
-        const valorCell = item.valor ? item.valor : 'Não cobramos';
-        return `
-            <tr>
-                <td class="col-img">${fotoCell}</td>
-                <td style="white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;">${item.descricao}</td>
-                <td class="col-garantia">${item.garantia || ''}</td>
-                <td class="col-valor">${valorCell}</td>
-            </tr>`;
-    }).join('');
-
-    // ── Dados auxiliares ──────────────────────────────
-    const pixInfo   = orc.chavePix || empresaConfig.pix || empresaConfig.cnpj || '';
-    const pagamento = orc.pagamento || 'transferência ou Pix';
-    const nomeEmp   = empresaConfig.nomeEmpresa || 'Empresa';
-    const cidade    = orc.cidade || 'Maceió (AL)';
-    const dataStr   = dataExtenso(orc.data);
-
-    // ── Bloco solicitante (só mostra campos preenchidos) ──
-    const solicitanteLinhas = [
-        orc.empresa         ? `<p><strong>Empresa/Solicitante:</strong> ${orc.empresa}</p>` : '',
-        orc.cnpjSolicitante ? `<p><strong>CNPJ:</strong> ${orc.cnpjSolicitante}</p>` : '',
-        orc.veiculo         ? `<p><strong>Veículo:</strong> ${orc.veiculo}</p>` : '',
-        orc.placa           ? `<p><strong>Placa:</strong> ${orc.placa}</p>` : '',
-        orc.pelicula        ? `<p><strong>Película:</strong> ${orc.pelicula}</p>` : '',
-    ].filter(Boolean).join('');
-
-    // ── Assinatura ────────────────────────────────────
-    const assHTML = (empresaConfig.responsavel || empresaConfig.cargo) ? `
-        <p class="atenc">Atenciosamente,</p>
-        <div class="linha-ass"></div>
-        ${empresaConfig.responsavel ? `<p class="ass-nome">${empresaConfig.responsavel}</p>` : ''}
-        ${empresaConfig.cargo       ? `<p class="ass-cargo">${empresaConfig.cargo}</p>`       : ''}
-    ` : `<p class="atenc">Atenciosamente,</p><div class="linha-ass"></div>`;
-
-    return `
-    <div id="orcamento-preview">
-        ${bgHtml}
-        <div class="orc-inner">
-
-            <!-- CABEÇALHO -->
-            <div class="orc-header">
-                <div class="orc-logo-area">${logoHtml}</div>
-                <div class="orc-empresa-nome">
-                    <span class="nome-grande">${nomeEmp.toUpperCase()}</span>
-                    <span class="subtitulo">Equipadora</span>
-                </div>
-            </div>
-
-            <!-- INTRO -->
-            <p class="orc-intro">
-                &nbsp;&nbsp;&nbsp;&nbsp;A empresa ${nomeEmp}, com sede na ${empresaConfig.endereco},
-                inscrita no CNPJ sob o nº ${empresaConfig.cnpj},
-                envia o presente orçamento, com validade de até ${orc.validade || 30} dias.
-            </p>
-
-            <!-- SOLICITANTE -->
-            <div class="orc-solicitante">${solicitanteLinhas}</div>
-
-            <!-- TABELA -->
-            <div class="orc-table-wrapper">
-                <div class="orc-table-title">O R Ç A M E N T O</div>
-                <table class="orc-table">
-                    <thead>
-                        <tr>
-                            <th class="col-img"></th>
-                            <th>Descrição dos produtos e serviços</th>
-                            <th class="col-garantia">Garantia</th>
-                            <th class="col-valor">Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${itensHTML}
-                        <tr class="row-total">
-                            <td colspan="4" style="word-wrap:break-word;overflow-wrap:break-word;">
-                                <strong>Total: ${totalFormatado} (${totalExtenso})</strong>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- OBSERVAÇÃO -->
-            ${orc.obs ? `<p class="orc-obs"><strong>Observação:</strong> ${orc.obs}</p>` : ''}
-
-            <!-- PAGAMENTO -->
-            <div class="orc-pagamento">
-                <strong>Condições de pagamento:</strong>
-                Forma de pagamento: ${pagamento}<br>
-                ${pixInfo ? `Chave-pix (CNPJ): ${pixInfo}` : ''}
-            </div>
-
-            <!-- LOCALIDADE / DATA -->
-            <p class="orc-footer-loc">${cidade}, ${dataStr}.</p>
-
-            <!-- ASSINATURA -->
-            <div class="orc-assinatura">${assHTML}</div>
-
-        </div>
+// ══════════════════════════════════════════
+// HISTÓRICO
+// ══════════════════════════════════════════
+function renderHistorico(filtro) {
+  const lista = document.getElementById('lista-historico');
+  let docs = documentos;
+  if (filtro) {
+    const f = filtro.toLowerCase();
+    docs = docs.filter(d =>
+      (d.cliente?.nome || '').toLowerCase().includes(f) ||
+      (d.veiculo?.placa || '').toLowerCase().includes(f) ||
+      (d.numero || '').includes(f)
+    );
+  }
+  if (docs.length === 0) {
+    lista.innerHTML = `<div class="card" style="text-align:center; color:var(--cinza); font-size:13px; padding:24px;">
+      <div style="font-size:40px; margin-bottom:8px;">📂</div>
+      Nenhum documento encontrado
     </div>`;
-}
-function renderizarOrcamentos() {
-    tabelaOrcamentosBody.innerHTML = '';
-    let total = 0;
-
-    orcamentos.forEach(orc => {
-        const t = calcularTotalOrcamento(orc.itens);
-        total += t;
-
-        const statusLabels = { pendente: 'Pendente', aceito: 'Aceito', recusado: 'Recusado' };
-        const statusClass = orc.status || 'pendente';
-        const statusHTML = `<span class="fin-orcamento-status ${statusClass}">${statusLabels[statusClass] || 'Pendente'}</span>`;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>#${orc.id}</td>
-            <td>${orc.empresa}</td>
-            <td>${formatarMoeda(t)}</td>
-            <td>${formatarData(orc.data)}</td>
-            <td>${orc.validade || 30} dias</td>
-            <td>${statusHTML}</td>
-            <td>
-                <button class="btn-acao" title="Visualizar" onclick="visualizarOrcamento(${orc.id})" style="color:var(--cor-orcamento)"><i class="fas fa-eye"></i></button>
-                <button class="btn-acao" title="Editar" onclick="editarOrcamento(${orc.id})"><i class="fas fa-edit"></i></button>
-                <button class="btn-acao" title="Excluir" onclick="excluirOrcamento(${orc.id})"><i class="fas fa-trash-alt"></i></button>
-            </td>`;
-        tabelaOrcamentosBody.appendChild(tr);
-    });
-
-    document.getElementById('total-orcamentos').textContent = orcamentos.length;
-    document.getElementById('valor-total-orcamentos').textContent = formatarMoeda(total);
-    document.getElementById('badge-orcamentos').textContent = orcamentos.length;
+    return;
+  }
+  lista.innerHTML = docs.map((doc, i) => {
+    const isOrc = doc.tipo === 'orcamento';
+    const statusBadge = doc.pagamento?.status === 'pago'
+      ? '<span class="badge badge-pago">Pago</span>'
+      : doc.pagamento?.status === 'pendente'
+        ? '<span class="badge badge-pendente">Pendente</span>'
+        : '';
+    return `
+      <div class="doc-item" onclick="verDoc(${documentos.indexOf(doc)})">
+        <div class="doc-icon">${isOrc ? '📋' : '🧾'}</div>
+        <div class="doc-info">
+          <div class="doc-title">${isOrc ? 'Orçamento' : 'Recibo'} #${doc.numero} — ${escHtml(doc.cliente?.nome || 'Sem nome')}</div>
+          <div class="doc-sub">🚗 ${escHtml(doc.veiculo?.modelo || '')} ${escHtml(doc.veiculo?.placa || '')} · ${doc.data} · <strong>${formatMoeda(doc.total)}</strong> ${statusBadge}</div>
+        </div>
+        <span style="font-size:18px; color:var(--cinza);">›</span>
+      </div>
+    `;
+  }).join('');
 }
 
-function salvarOrcamento(orc) {
-    const idx = orcamentos.findIndex(x => x.id === orc.id);
-    if (idx > -1) orcamentos[idx] = orc;
-    else { orc.id = proximoOrcamentoId++; orcamentos.push(orc); }
-    localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-    renderizarOrcamentos();
-    return orc.id;
+function filtrarDocs() {
+  renderHistorico(document.getElementById('busca-input').value);
 }
 
-function visualizarOrcamento(id) {
-    const orc = orcamentos.find(x => x.id === id);
-    if (!orc) return;
-    const container = document.getElementById('modal-view-orcamento').querySelector('.modal-content');
-    const existing = container.querySelector('#orcamento-preview');
-    const newHTML = gerarHTMLOrcamento(orc);
-    if (existing) {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = newHTML;
-        existing.replaceWith(tmp.firstElementChild);
-    } else {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = newHTML;
-        container.insertBefore(tmp.firstElementChild, document.getElementById('btn-download-orc-pdf'));
-    }
-    abrirModal(modalViewOrcamento);
+function verDoc(idx) {
+  const doc = documentos[idx];
+  document.getElementById('modal-doc-title').textContent = (doc.tipo === 'orcamento' ? '📋 Orçamento' : '🧾 Recibo') + ' #' + doc.numero;
+  document.getElementById('modal-doc-content').innerHTML = `
+    <div style="font-size:13px; color:var(--cinza); margin-bottom:12px;">
+      <strong>${escHtml(doc.cliente?.nome)}</strong> · ${doc.data}
+    </div>
+    <div style="font-size:12px; margin-bottom:4px;">🚗 ${escHtml(doc.veiculo?.modelo)} — Placa: ${escHtml(doc.veiculo?.placa)}</div>
+    <div style="font-size:12px; margin-bottom:12px;">Película: ${escHtml(doc.veiculo?.pelicula)}</div>
+    <div style="font-size:13px; font-weight:700; margin-bottom:8px; color:var(--azul);">${doc.itens.length} item(s)</div>
+    ${doc.itens.map(it => `<div style="font-size:12px; padding:6px 0; border-bottom:1px solid var(--borda);">${escHtml(it.desc)} — ${it.qtd}x ${formatMoeda(it.preco)} = <strong>${formatMoeda(it.total)}</strong></div>`).join('')}
+    <div class="total-box" style="margin-top:12px; margin-bottom:12px;">
+      <span class="total-label">TOTAL</span>
+      <span class="total-valor">${formatMoeda(doc.total)}</span>
+    </div>
+    ${doc.obs ? `<div style="font-size:12px; background:var(--amarelo-bg); border-left:3px solid var(--amarelo-borda); padding:8px 10px; border-radius:0 6px 6px 0; margin-bottom:12px;">${escHtml(doc.obs)}</div>` : ''}
+  `;
+  document.getElementById('btn-baixar-doc').onclick = () => { fecharModal('modal-doc'); gerarPDFDoc(doc); };
+  document.getElementById('modal-doc').classList.add('open');
 }
 
-function editarOrcamento(id) {
-    const orc = orcamentos.find(x => x.id === id);
-    if (!orc) return;
-    preencherFormOrcamento(orc);
-    document.getElementById('modal-orcamento-titulo').innerHTML = '<i class="fas fa-edit"></i> Editar Orçamento';
-    abrirModal(modalOrcamento);
+// ══════════════════════════════════════════
+// GERAÇÃO DE PDF — html2canvas + jsPDF
+// ══════════════════════════════════════════
+function gerarPDF() {
+  if (itens.length === 0) { showToast('⚠️ Adicione pelo menos um item'); return; }
+  const doc = coletarDadosDoc();
+  gerarPDFDoc(doc);
 }
 
-function excluirOrcamento(id) {
-    if (confirm('Excluir este orçamento?')) {
-        orcamentos = orcamentos.filter(o => o.id !== id);
-        localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-        renderizarOrcamentos();
-    }
-}
+async function gerarPDFDoc(doc) {
+  mostrarLoading('Gerando PDF...');
+  try {
+    const html = montarHTMLPDF(doc);
+    const container = document.getElementById('pdf-template');
+    container.innerHTML = html;
+    container.style.left = '-9999px';
+    container.style.top = '0px';
+    container.style.position = 'fixed';
+    container.style.width = '390px';
+    container.style.zIndex = '-1';
+    document.body.appendChild(container);
 
-function alterarStatusOrcamento(id, status) {
-    const orc = orcamentos.find(x => x.id === id);
-    if (!orc) return;
-    orc.status = status;
-    localStorage.setItem('orcamentos', JSON.stringify(orcamentos));
-    renderizarOrcamentos();
-    renderizarPainelFinanceiro();
-}
+    // Aguarda renderização completa das imagens
+    await esperarImagens(container);
+    await new Promise(r => setTimeout(r, 300));
 
-function preencherFormOrcamento(orc) {
-    document.getElementById('orc-id-edicao').value = orc.id || '';
-    document.getElementById('orc-empresa').value = orc.empresa || '';
-    document.getElementById('orc-cnpj-solicitante').value = orc.cnpjSolicitante || '';
-    document.getElementById('orc-veiculo').value = orc.veiculo || '';
-    document.getElementById('orc-placa').value = orc.placa || '';
-    document.getElementById('orc-pelicula').value = orc.pelicula || '';
-    document.getElementById('orc-data').value = orc.data || '';
-    document.getElementById('orc-validade').value = orc.validade || 30;
-    document.getElementById('orc-obs').value = orc.obs || '';
-    document.getElementById('orc-pagamento').value = orc.pagamento || 'transferência ou Pix';
-    document.getElementById('orc-cidade').value = orc.cidade || 'Maceió (AL)';
-    itensContainer.innerHTML = '';
-    itensFotos = {};
-    (orc.itens || []).forEach(item => adicionarItemOrcamento(item));
-}
-
-formOrcamento.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const itens = coletarItens();
-    if (itens.length === 0) {
-        alert('Adicione pelo menos um item ao orçamento.');
-        return;
-    }
-    const orc = {
-        id: document.getElementById('orc-id-edicao').value ? parseInt(document.getElementById('orc-id-edicao').value) : null,
-        empresa: document.getElementById('orc-empresa').value,
-        cnpjSolicitante: document.getElementById('orc-cnpj-solicitante').value,
-        veiculo: document.getElementById('orc-veiculo').value,
-        placa: document.getElementById('orc-placa').value,
-        pelicula: document.getElementById('orc-pelicula').value,
-        data: document.getElementById('orc-data').value,
-        validade: document.getElementById('orc-validade').value,
-        obs: document.getElementById('orc-obs').value,
-        pagamento: document.getElementById('orc-pagamento').value,
-        cidade: document.getElementById('orc-cidade').value,
-        status: 'pendente',
-        itens
-    };
-    const newId = salvarOrcamento(orc);
-    fecharModal(modalOrcamento);
-    visualizarOrcamento(newId);
-});
-
-btnAddOrcamento.addEventListener('click', () => {
-    document.getElementById('modal-orcamento-titulo').innerHTML = '<i class="fas fa-file-invoice-dollar"></i> Criar Orçamento';
-    document.getElementById('orc-id-edicao').value = '';
-    formOrcamento.reset();
-    itensContainer.innerHTML = '';
-    itensFotos = {};
-    document.getElementById('orc-data').value = new Date().toISOString().split('T')[0];
-    document.getElementById('orc-veiculo').value = '';
-    document.getElementById('orc-placa').value = '';
-    document.getElementById('orc-pelicula').value = '';
-    document.getElementById('orc-validade').value = 30;
-    document.getElementById('orc-pagamento').value = 'transferência ou Pix';
-    document.getElementById('orc-cidade').value = 'Maceió (AL)';
-    adicionarItemOrcamento(null);
-    abrirModal(modalOrcamento);
-});
-
-btnDownloadOrcPdf.addEventListener('click', () => {
-    window.jsPDF = window.jspdf.jsPDF;
-    const element = document.getElementById('orcamento-preview');
-    if (!element) return;
-    btnDownloadOrcPdf.disabled = true;
-    btnDownloadOrcPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando PDF...';
-
-    // Clone element into a fixed off-screen container for full capture (avoids modal scroll/clip issues)
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = [
-        'position:fixed',
-        'left:-9999px',
-        'top:0',
-        'width:740px',
-        'background:#fff',
-        'z-index:-1',
-        'visibility:hidden',
-        'pointer-events:none'
-    ].join(';');
-    const clone = element.cloneNode(true);
-    clone.style.cssText = 'width:740px;min-width:740px;border:none;margin:0;';
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
-
-    html2canvas(clone, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: 740,
-        windowWidth: 740
-    }).then(canvas => {
-        document.body.removeChild(wrapper);
-
-        const imgData = canvas.toDataURL('image/png');
-        const doc = new jsPDF('p', 'pt', 'a4');
-
-        const pageW = 595.28;
-        const pageH = 841.89;
-        const margin = 18;
-        const usableW = pageW - 2 * margin;
-        const usableH = pageH - 2 * margin;
-
-        const canvasAspect = canvas.height / canvas.width;
-        let drawW = usableW;
-        let drawH = usableW * canvasAspect;
-
-        if (drawH > usableH) {
-            drawH = usableH;
-            drawW = usableH / canvasAspect;
+    const canvas = await html2canvas(container, {
+      scale: 3,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      width: 390,
+      scrollX: 0,
+      scrollY: 0,
+      logging: false,
+      imageTimeout: 5000,
+      onclone: function(clonedDoc) {
+        const el = clonedDoc.getElementById('pdf-template');
+        if (el) {
+          el.style.left = '0';
+          el.style.position = 'relative';
         }
-
-        const xOffset = margin + (usableW - drawW) / 2;
-        doc.addImage(imgData, 'PNG', xOffset, margin, drawW, drawH);
-        doc.save(`orcamento-${Date.now()}.pdf`);
-        btnDownloadOrcPdf.disabled = false;
-        btnDownloadOrcPdf.innerHTML = '<i class="fas fa-download"></i> Baixar PDF';
-    }).catch(err => {
-        document.body.removeChild(wrapper);
-        btnDownloadOrcPdf.disabled = false;
-        btnDownloadOrcPdf.innerHTML = '<i class="fas fa-download"></i> Baixar PDF';
-        console.error('Erro ao gerar PDF:', err);
-        alert('Erro ao gerar PDF. Tente novamente.');
+      }
     });
-});
 
-// ============================================================
-// PAINEL FINANCEIRO
-// ============================================================
+    const { jsPDF } = window.jspdf;
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
 
-function getReceitaMes(ano, mes) {
-    return recibos.filter(r => {
-        const d = new Date(r.data + 'T12:00:00');
-        return d.getFullYear() === ano && d.getMonth() === mes;
-    }).reduce((s, r) => s + parseFloat(r.valor), 0);
-}
+    const pxToMm = (px) => px * 0.264583;
+    const larguraMm = pxToMm(390);
+    const alturaMm = pxToMm(canvas.height / 3);
 
-function getNomesMes(offset) {
-    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    const hoje = new Date();
-    const d = new Date(hoje.getFullYear(), hoje.getMonth() + offset, 1);
-    return { nome: meses[d.getMonth()], mes: d.getMonth(), ano: d.getFullYear() };
-}
-
-function renderizarPainelFinanceiro() {
-    const hoje = new Date();
-    const mesAtual = hoje.getMonth();
-    const anoAtual = hoje.getFullYear();
-    const diaAtual = hoje.getDate();
-    const diasNoMes = new Date(anoAtual, mesAtual + 1, 0).getDate();
-    const percentualMes = diaAtual / diasNoMes;
-
-    // Receita mês atual
-    const receitaMesAtual = getReceitaMes(anoAtual, mesAtual);
-
-    // Receita 3 meses anteriores
-    const m1 = getNomesMes(-1);
-    const m2 = getNomesMes(-2);
-    const m3 = getNomesMes(-3);
-    const r1 = getReceitaMes(m1.ano, m1.mes);
-    const r2 = getReceitaMes(m2.ano, m2.mes);
-    const r3 = getReceitaMes(m3.ano, m3.mes);
-
-    const mediaUltimos3 = (r1 + r2 + r3) / 3;
-    const mediaUltimos3PorDia = mediaUltimos3 / diasNoMes;
-
-    // Projeção: se continuar no ritmo atual
-    const ritmoAtual = diaAtual > 0 ? receitaMesAtual / diaAtual : 0;
-    const projecaoRitmoAtual = ritmoAtual * diasNoMes;
-
-    // Projeção baseada na média histórica
-    const projecaoHistorica = mediaUltimos3PorDia * diasNoMes;
-
-    // Orçamentos pendentes e aceitos
-    const orcPendentes = orcamentos.filter(o => !o.status || o.status === 'pendente');
-    const orcAceitos = orcamentos.filter(o => o.status === 'aceito');
-    const totalOrcPendente = orcPendentes.reduce((s, o) => s + calcularTotalOrcamento(o.itens), 0);
-    const totalOrcAceito = orcAceitos.reduce((s, o) => s + calcularTotalOrcamento(o.itens), 0);
-
-    // Projeção considerando orçamentos aceitos
-    const projecaoComAceitos = receitaMesAtual + totalOrcAceito;
-
-    // --- CARDS MÊS ATUAL ---
-    document.getElementById('fin-cards-mes').innerHTML = `
-        <div class="fin-card verde">
-            <div class="fin-card-icon">💰</div>
-            <div class="fin-card-label">Receita Realizada</div>
-            <div class="fin-card-value">${formatarMoeda(receitaMesAtual)}</div>
-            <div class="fin-card-sub">${recibos.filter(r => { const d = new Date(r.data+'T12:00:00'); return d.getMonth()===mesAtual&&d.getFullYear()===anoAtual; }).length} recibos</div>
-        </div>
-        <div class="fin-card azul">
-            <div class="fin-card-icon">📋</div>
-            <div class="fin-card-label">Orçamentos Aceitos</div>
-            <div class="fin-card-value">${formatarMoeda(totalOrcAceito)}</div>
-            <div class="fin-card-sub">${orcAceitos.length} orçamento(s)</div>
-        </div>
-        <div class="fin-card laranja">
-            <div class="fin-card-icon">⏳</div>
-            <div class="fin-card-label">Orçamentos Pendentes</div>
-            <div class="fin-card-value">${formatarMoeda(totalOrcPendente)}</div>
-            <div class="fin-card-sub">${orcPendentes.length} orçamento(s)</div>
-        </div>
-        <div class="fin-card cinza">
-            <div class="fin-card-icon">📈</div>
-            <div class="fin-card-label">Média Últimos 3 Meses</div>
-            <div class="fin-card-value">${formatarMoeda(mediaUltimos3)}</div>
-            <div class="fin-card-sub">Referência histórica</div>
-        </div>
-    `;
-
-    // --- BARRA PROGRESSO DO MÊS ---
-    const pct = Math.min(100, Math.round((receitaMesAtual / (mediaUltimos3 || 1)) * 100));
-    document.getElementById('fin-progresso-label').textContent = `${pct}% da média histórica`;
-    document.getElementById('fin-progresso-barra').style.width = pct + '%';
-    document.getElementById('fin-progresso-text').textContent =
-        `Dia ${diaAtual} de ${diasNoMes} (${Math.round(percentualMes*100)}% do mês) — ritmo atual: ${formatarMoeda(ritmoAtual)}/dia`;
-
-    // --- PROJEÇÃO ---
-    document.getElementById('fin-projecao-grid').innerHTML = `
-        <div class="fin-proj-item">
-            <div class="lab">Projeção pelo Ritmo Atual</div>
-            <div class="val">${formatarMoeda(projecaoRitmoAtual)}</div>
-        </div>
-        <div class="fin-proj-item">
-            <div class="lab">Projeção Histórica (3 meses)</div>
-            <div class="val">${formatarMoeda(projecaoHistorica)}</div>
-        </div>
-        <div class="fin-proj-item">
-            <div class="lab">Com Orçamentos Aceitos</div>
-            <div class="val">${formatarMoeda(projecaoComAceitos)}</div>
-        </div>
-    `;
-
-    // --- ALERTA TENDÊNCIA ---
-    let alertaHTML = '';
-    if (diaAtual < 5) {
-        alertaHTML = `<div class="fin-alerta info"><i class="fas fa-info-circle"></i><span>Início do mês — a projeção ficará mais precisa conforme mais recibos forem registrados.</span></div>`;
-    } else if (projecaoRitmoAtual >= mediaUltimos3 * 1.1) {
-        alertaHTML = `<div class="fin-alerta sucesso"><i class="fas fa-arrow-trend-up"></i><span><strong>Acima da média!</strong> Você está em um ritmo <strong>${Math.round((projecaoRitmoAtual/mediaUltimos3-1)*100)}% superior</strong> à sua média histórica. Excelente momento para aumentar os aportes na reserva e capital de giro!</span></div>`;
-    } else if (projecaoRitmoAtual < mediaUltimos3 * 0.7) {
-        alertaHTML = `<div class="fin-alerta perigo"><i class="fas fa-exclamation-triangle"></i><span><strong>Atenção:</strong> Ritmo atual está <strong>${Math.round((1-projecaoRitmoAtual/mediaUltimos3)*100)}% abaixo</strong> da média histórica. Considere intensificar as prospecções e acompanhar os orçamentos pendentes.</span></div>`;
-    } else if (projecaoRitmoAtual < mediaUltimos3 * 0.9) {
-        alertaHTML = `<div class="fin-alerta aviso"><i class="fas fa-exclamation-circle"></i><span>Ritmo levemente abaixo do esperado. Há <strong>${orcPendentes.length} orçamento(s) pendente(s)</strong> que podem impulsionar o resultado — acompanhe de perto!</span></div>`;
-    } else {
-        alertaHTML = `<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Você está no ritmo esperado para o mês. Continue assim!</span></div>`;
-    }
-    document.getElementById('fin-alerta-tendencia').innerHTML = alertaHTML;
-
-    // --- GRÁFICO 3 MESES ---
-    const historicoMeses = [m3, m2, m1, { nome: 'Atual', mes: mesAtual, ano: anoAtual }];
-    const valoresMeses = [r3, r2, r1, receitaMesAtual];
-    const maxVal = Math.max(...valoresMeses, 1);
-
-    let grafHTML = '<div class="fin-mes-grafico">';
-    historicoMeses.forEach((m, i) => {
-        const v = valoresMeses[i];
-        const h = Math.max(6, Math.round((v / maxVal) * 70));
-        const cor = i === 3 ? '#0a6640' : '#1a3a6b';
-        grafHTML += `
-            <div class="fin-barra-mes" title="${m.nome}: ${formatarMoeda(v)}">
-                <div style="font-size:0.7em;color:#444;margin-bottom:3px;">${formatarMoeda(v)}</div>
-                <div class="fin-barra-mes-fill" style="height:${h}px; background:${cor};"></div>
-                <div class="fin-barra-mes-label">${m.nome}</div>
-            </div>`;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [larguraMm, alturaMm],
+      compress: true
     });
-    grafHTML += '</div>';
-    document.getElementById('fin-grafico-meses').innerHTML = grafHTML;
 
-    // --- ORÇAMENTOS EM ABERTO ---
-    const orcAbertos = orcamentos.filter(o => !o.status || o.status === 'pendente' || o.status === 'aceito');
-    const tbody = document.getElementById('fin-orc-abertos-body');
-    tbody.innerHTML = '';
-    if (orcAbertos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Nenhum orçamento em aberto</td></tr>';
-    } else {
-        orcAbertos.forEach(orc => {
-            const t = calcularTotalOrcamento(orc.itens);
-            const s = orc.status || 'pendente';
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>#${orc.id}</td>
-                <td>${orc.empresa}</td>
-                <td><strong>${formatarMoeda(t)}</strong></td>
-                <td>${formatarData(orc.data)}</td>
-                <td><span class="fin-orcamento-status ${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span></td>
-                <td>
-                    <select class="fin-orcamento-status-sel" onchange="alterarStatusOrcamento(${orc.id}, this.value)">
-                        <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
-                        <option value="aceito"   ${s==='aceito'?'selected':''}>Aceito</option>
-                        <option value="recusado" ${s==='recusado'?'selected':''}>Recusado</option>
-                    </select>
-                </td>`;
-            tbody.appendChild(tr);
-        });
-    }
+    pdf.addImage(imgData, 'JPEG', 0, 0, larguraMm, alturaMm, '', 'MEDIUM');
 
-    const totalAberto = orcAbertos.reduce((s, o) => s + calcularTotalOrcamento(o.itens), 0);
-    document.getElementById('fin-orc-abertos-total').innerHTML =
-        `Total em aberto: <strong>${formatarMoeda(totalAberto)}</strong> — Aceitos: <strong style="color:var(--cor-financeiro)">${formatarMoeda(totalOrcAceito)}</strong> — Pendentes: <strong style="color:#c97d00">${formatarMoeda(totalOrcPendente)}</strong>`;
+    const nomeArquivo = `${doc.tipo}_${doc.numero}_${(doc.cliente?.nome || 'cliente').replace(/\s+/g, '_').substring(0, 20)}.pdf`;
+    pdf.save(nomeArquivo);
 
-    // --- ALERTA CAPITALIZAÇÃO ---
-    let alertaCapHTML = '';
-    if (receitaMesAtual > 0) {
-        alertaCapHTML = `<div class="fin-alerta sucesso"><i class="fas fa-piggy-bank"></i><span>Com base na sua receita realizada de <strong>${formatarMoeda(receitaMesAtual)}</strong>, confira abaixo os valores sugeridos para aporte em reserva e capital de giro. Ajuste os sliders conforme sua necessidade.</span></div>`;
-    } else {
-        alertaCapHTML = `<div class="fin-alerta info"><i class="fas fa-info-circle"></i><span>Registre recibos de pagamento para receber recomendações personalizadas de capitalização.</span></div>`;
-    }
-    document.getElementById('fin-alerta-cap').innerHTML = alertaCapHTML;
-
-    // Atualiza capitalização
-    atualizarCapitalizacao();
+    container.innerHTML = '';
+    esconderLoading();
+    showToast('✅ PDF gerado com sucesso!');
+  } catch (err) {
+    esconderLoading();
+    showToast('❌ Erro ao gerar PDF. Tente novamente.');
+    console.error('Erro PDF:', err);
+  }
 }
 
-function atualizarCapitalizacao() {
-    const hoje = new Date();
-    const mesAtual = hoje.getMonth();
-    const anoAtual = hoje.getFullYear();
-    const receitaMesAtual = getReceitaMes(anoAtual, mesAtual);
+function esperarImagens(container) {
+  const imgs = container.querySelectorAll('img');
+  const promises = Array.from(imgs).map(img => {
+    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+    return new Promise(res => {
+      img.onload = res;
+      img.onerror = res;
+      setTimeout(res, 3000);
+    });
+  });
+  return Promise.all(promises);
+}
 
-    const pctReserva = parseInt(document.getElementById('slider-reserva').value);
-    const pctCapital = parseInt(document.getElementById('slider-capital').value);
+// ══════════════════════════════════════════
+// MONTAR HTML DO PDF
+// ══════════════════════════════════════════
+function montarHTMLPDF(doc) {
+  const emp = doc.empresa || JSON.parse(localStorage.getItem('tf_empresa') || '{}');
+  const isOrc = doc.tipo === 'orcamento';
+  const total = doc.total || 0;
+  const validade = emp.validade || 30;
 
-    document.getElementById('val-reserva').textContent = pctReserva + '%';
-    document.getElementById('val-capital').textContent = pctCapital + '%';
+  const logoHtml = emp.logo && emp.logo.startsWith('data:')
+    ? `<img src="${emp.logo}" class="pdf-logo-img" crossorigin="anonymous">`
+    : `<div style="width:64px;height:48px;background:rgba(255,255,255,0.1);border-radius:6px;border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(255,255,255,0.5);">LOGO</div>`;
 
-    const valorReserva = receitaMesAtual * pctReserva / 100;
-    const valorCapital = receitaMesAtual * pctCapital / 100;
-    const totalAporte = valorReserva + valorCapital;
-    const restante = receitaMesAtual - totalAporte;
-    const pctTotal = Math.min(100, pctReserva + pctCapital);
-
-    // Dados acumulados salvos
-    let cap = JSON.parse(localStorage.getItem('capitalizacao')) || { reserva: 0, capital: 0 };
-
-    document.getElementById('fin-cap-grid').innerHTML = `
-        <div class="fin-cap-card reserva">
-            <h4>🛡️ Reserva de Emergência</h4>
-            <p>Protege o negócio em meses com baixa receita. Meta recomendada: 3 a 6 meses de custos fixos.</p>
-            <div class="fin-cap-valor">${formatarMoeda(valorReserva)}</div>
-            <div style="font-size:0.78em;color:#777;">Aporte sugerido este mês (${pctReserva}%)</div>
-            <div class="fin-cap-progress">
-                <div class="fin-cap-progress-bar" style="width:${pctReserva}%"></div>
-            </div>
-            <div style="font-size:0.75em;color:#999;">Acumulado salvo: ${formatarMoeda(cap.reserva)}</div>
-            <button onclick="registrarAporte('reserva', ${valorReserva})" style="margin-top:8px;padding:6px 14px;background:#c97d00;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.82em;font-weight:bold;">
-                ✔ Registrar Aporte
-            </button>
-        </div>
-        <div class="fin-cap-card capital">
-            <h4>🔄 Capital de Giro</h4>
-            <p>Garante a continuidade das operações, cobrindo compras, despesas e investimentos em crescimento.</p>
-            <div class="fin-cap-valor">${formatarMoeda(valorCapital)}</div>
-            <div style="font-size:0.78em;color:#777;">Aporte sugerido este mês (${pctCapital}%)</div>
-            <div class="fin-cap-progress">
-                <div class="fin-cap-progress-bar" style="width:${Math.min(100, pctCapital * 2)}%"></div>
-            </div>
-            <div style="font-size:0.75em;color:#999;">Acumulado salvo: ${formatarMoeda(cap.capital)}</div>
-            <button onclick="registrarAporte('capital', ${valorCapital})" style="margin-top:8px;padding:6px 14px;background:#1a3a6b;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.82em;font-weight:bold;">
-                ✔ Registrar Aporte
-            </button>
-        </div>
+  const itensHtml = doc.itens.map((item, i) => {
+    const fotoHtml = item.foto
+      ? `<img src="${item.foto}" class="pdf-item-img" crossorigin="anonymous">`
+      : `<div class="pdf-sem-foto">sem foto</div>`;
+    return `
+      <tr>
+        <td class="center" style="width:62px;">${fotoHtml}</td>
+        <td style="word-break:break-word; white-space:pre-wrap;">${escHtml(item.desc)}</td>
+        <td class="center" style="width:36px;">${item.qtd}</td>
+        <td class="right" style="width:72px;">${formatMoeda(item.preco)}</td>
+        <td class="right" style="width:78px; font-weight:700; color:#166534;">${formatMoeda(item.total)}</td>
+      </tr>
     `;
+  }).join('');
 
-    // Conselho personalizado
-    let conselho = '';
-    if (receitaMesAtual === 0) {
-        conselho = '';
-    } else if (pctTotal > 50) {
-        conselho = `<div class="fin-alerta aviso"><i class="fas fa-exclamation-circle"></i><span>Você está alocando <strong>${pctTotal}%</strong> da receita em aportes. Certifique-se de que o restante (<strong>${formatarMoeda(restante)}</strong>) seja suficiente para cobrir todos os custos operacionais do mês.</span></div>`;
-    } else if (pctTotal < 10 && receitaMesAtual > 0) {
-        conselho = `<div class="fin-alerta aviso"><i class="fas fa-lightbulb"></i><span>Seu percentual de aporte está baixo. Recomendamos pelo menos <strong>20-30%</strong> da receita para construir proteção e capacidade de investimento ao longo do tempo.</span></div>`;
-    } else {
-        conselho = `<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Boa estratégia! Você está destinando <strong>${pctTotal}%</strong> (${formatarMoeda(totalAporte)}) para capitalização, sobrando <strong>${formatarMoeda(restante)}</strong> para operações e retiradas.</span></div>`;
-    }
-    document.getElementById('fin-cap-conselho').innerHTML = conselho;
+  const obsHtml = doc.obs
+    ? `<div class="pdf-obs-block">
+        <div class="pdf-obs-title">Observações</div>
+        <div class="pdf-obs-text">${escHtml(doc.obs)}</div>
+      </div>` : '';
+
+  const pagHtml = !isOrc && doc.pagamento?.forma
+    ? `<div class="pdf-info-block" style="margin-top:12px;">
+        <div class="pdf-info-row"><strong>Forma de Pagamento:</strong> ${escHtml(doc.pagamento.forma)}</div>
+        <div class="pdf-info-row"><strong>Status:</strong> ${doc.pagamento.status === 'pago' ? '✔ Pago' : '⏳ Pendente'}</div>
+      </div>` : '';
+
+  const assinaturaHtml = isOrc
+    ? `<div class="pdf-assinatura">
+        <div class="pdf-assin-box">Assinatura do Cliente</div>
+        <div class="pdf-assin-box">${escHtml(emp.nome || 'Tony Fumê')}</div>
+      </div>` : '';
+
+  const telefoneHtml = emp.telefone ? ` · ${escHtml(emp.telefone)}` : '';
+  const emailHtml = emp.email ? ` · ${escHtml(emp.email)}` : '';
+
+  return `
+  <div class="pdf-wrap" id="pdf-content">
+    <div class="pdf-header">
+      ${logoHtml}
+      <div style="text-align:right;">
+        <div class="pdf-logo-text">${escHtml(emp.nome || 'TONY FUMÊ')}</div>
+        <div class="pdf-logo-sub">${isOrc ? 'orçamento' : 'recibo de pagamento'}</div>
+      </div>
+    </div>
+    <div class="pdf-body">
+      <div class="pdf-empresa-desc">
+        A empresa <strong>${escHtml(emp.nome || 'Tony Fumê')}</strong>, com sede na ${escHtml(emp.endereco || 'Avenida Juca Sampaio, 1552, Jacintinho')},
+        inscrita no CNPJ sob o nº ${escHtml(emp.cnpj || '13.949.583/0001-32')},
+        ${isOrc ? `envia o presente orçamento, com validade de até ${validade} dias.` : 'emite o presente recibo de pagamento.'}
+      </div>
+
+      <div style="margin-bottom:4px;">
+        <span class="pdf-tipo-badge">${isOrc ? 'Orçamento' : 'Recibo'}</span>
+        ${isOrc ? `<span class="pdf-validade">Válido por ${validade} dias</span>` : ''}
+      </div>
+      <div class="pdf-numero">Nº ${doc.numero} · Emitido em ${doc.data}</div>
+
+      <div class="pdf-info-block">
+        <div class="pdf-info-row"><strong>Empresa/Solicitante:</strong> ${escHtml(doc.cliente?.nome || '—')}</div>
+        <div class="pdf-info-row"><strong>CPF/CNPJ:</strong> ${escHtml(doc.cliente?.doc || '—')}</div>
+      </div>
+
+      <div class="pdf-info-block" style="margin-top:10px;">
+        <div class="pdf-info-row"><strong>Veículo:</strong> ${escHtml(doc.veiculo?.modelo || '—')}</div>
+        <div class="pdf-info-row"><strong>Placa:</strong> ${escHtml(doc.veiculo?.placa || '—')}</div>
+        <div class="pdf-info-row"><strong>Película:</strong> ${escHtml(doc.veiculo?.pelicula || '—')}</div>
+      </div>
+
+      ${pagHtml}
+
+      <div class="pdf-section-title">${isOrc ? 'O R Ç A M E N T O' : 'S E R V I Ç O S / I T E N S'}</div>
+      <table class="pdf-table">
+        <thead>
+          <tr>
+            <th class="center">Foto</th>
+            <th>Descrição</th>
+            <th class="center">Qtd</th>
+            <th class="right">Unit.</th>
+            <th class="right">Total</th>
+          </tr>
+        </thead>
+        <tbody>${itensHtml}</tbody>
+      </table>
+      <div class="pdf-total-row">
+        <div>
+          <div class="pdf-total-label">TOTAL ${isOrc ? 'DO ORÇAMENTO' : 'PAGO'}</div>
+          <div class="pdf-total-extenso">${valorPorExtenso(total)}</div>
+        </div>
+        <div class="pdf-total-valor">${formatMoeda(total)}</div>
+      </div>
+
+      ${obsHtml}
+      ${assinaturaHtml}
+    </div>
+    <div class="pdf-footer">
+      ${escHtml(emp.nome || 'Tony Fumê')} · CNPJ ${escHtml(emp.cnpj || '13.949.583/0001-32')} · ${escHtml(emp.endereco || 'Av. Juca Sampaio, 1552')}${telefoneHtml}${emailHtml}
+    </div>
+  </div>`;
 }
 
-function registrarAporte(tipo, valor) {
-    let cap = JSON.parse(localStorage.getItem('capitalizacao')) || { reserva: 0, capital: 0 };
-    cap[tipo] = (cap[tipo] || 0) + valor;
-    localStorage.setItem('capitalizacao', JSON.stringify(cap));
-    alert(`Aporte de ${formatarMoeda(valor)} registrado em ${tipo === 'reserva' ? 'Reserva de Emergência' : 'Capital de Giro'}!`);
-    atualizarCapitalizacao();
+// ══════════════════════════════════════════
+// UTILITÁRIOS
+// ══════════════════════════════════════════
+function formatMoeda(v) {
+  return 'R$ ' + (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-btnPainelFinanceiro.addEventListener('click', () => {
-    renderizarPainelFinanceiro();
-    abrirModal(modalFinanceiro);
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function valorPorExtenso(valor) {
+  const inteiro = Math.floor(valor);
+  const centavos = Math.round((valor - inteiro) * 100);
+  const unidades = ['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+  const dezenas = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
+  const centenas = ['','cem','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
+  function converteGrupo(n) {
+    if (n === 0) return '';
+    if (n === 100) return 'cem';
+    let r = '';
+    if (n >= 100) { r += centenas[Math.floor(n/100)]; n %= 100; if (n) r += ' e '; }
+    if (n >= 20) { r += dezenas[Math.floor(n/10)]; n %= 10; if (n) r += ' e '; }
+    if (n > 0) r += unidades[n];
+    return r;
+  }
+  if (valor === 0) return '(zero reais)';
+  let ext = '';
+  const mil = Math.floor(inteiro / 1000);
+  const resto = inteiro % 1000;
+  if (mil > 0) { ext += converteGrupo(mil) + (mil === 1 ? ' mil' : ' mil'); }
+  if (resto > 0) { if (mil) ext += ' e '; ext += converteGrupo(resto); }
+  if (inteiro === 0) ext = 'zero';
+  ext += inteiro === 1 ? ' real' : ' reais';
+  if (centavos > 0) {
+    ext += ' e ' + converteGrupo(centavos) + (centavos === 1 ? ' centavo' : ' centavos');
+  }
+  return '(' + ext.charAt(0).toUpperCase() + ext.slice(1) + ')';
+}
+
+function mostrarLoading(txt) {
+  document.getElementById('loading-text').textContent = txt || 'Aguarde...';
+  document.getElementById('loading').classList.add('open');
+}
+function esconderLoading() {
+  document.getElementById('loading').classList.remove('open');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function fecharModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function abrirConfigModal() {
+  document.getElementById('modal-config').classList.add('open');
+}
+
+function limparTudo() {
+  if (confirm('Tem certeza? Todo o histórico será apagado.')) {
+    localStorage.removeItem('tf_documentos');
+    documentos = [];
+    renderHistorico();
+    fecharModal('modal-config');
+    showToast('🗑️ Histórico apagado');
+  }
+}
+
+// Fechar modais ao clicar no overlay
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
 });
-
-// ============================================================
-// INIT
-// ============================================================
-carregarConfiguracoes();
-renderizarClientes();
-renderizarRecibos();
-renderizarOrcamentos();
 </script>
 </body>
 </html>
