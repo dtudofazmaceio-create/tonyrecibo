@@ -169,12 +169,15 @@
 
         .modal-content.modal-wide { max-width: 900px; }
 
-        /* Allow horizontal scroll on orcamento preview in mobile */
+        /* Scroll horizontal no preview — mobile */
         #modal-view-orcamento .modal-content {
             overflow-x: auto;
+            padding: 16px;
         }
         #modal-view-orcamento #orcamento-preview {
             margin: 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
         }
         .modal-content.modal-financeiro { max-width: 960px; }
 
@@ -271,18 +274,20 @@
         .recibo-footer .contato-item { display: flex; align-items: center; gap: 5px; }
 
         /* ============================================
-           ORÇAMENTO STYLES
+           ORÇAMENTO STYLES — layout ref: Adonai
            ============================================ */
+
+        /* container principal — largura fixa para captura consistente */
         #orcamento-preview {
             background: #fff;
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 13px;
             color: #222;
-            width: 740px;
-            min-width: 740px;
+            width: 750px;
+            min-width: 750px;
             margin: 0 auto;
-            padding: 22px 28px;
-            border: 1px solid #ccc;
+            padding: 30px 36px 28px 36px;
+            border: 1px solid #d0d0d0;
             position: relative;
             overflow: visible;
             box-sizing: border-box;
@@ -290,117 +295,218 @@
             overflow-wrap: break-word;
         }
 
+        /* imagem de fundo opcional */
         .orc-bg-img {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover;
-            opacity: 0.05;
+            opacity: 0.04;
             z-index: 0;
             pointer-events: none;
         }
 
         .orc-inner { position: relative; z-index: 1; }
 
+        /* ── CABEÇALHO: logo esq | nome+subtítulo dir ── */
         .orc-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 14px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #e0e0e0;
         }
 
+        .orc-logo-area {
+            display: flex;
+            align-items: center;
+        }
         .orc-logo-area img {
-            max-height: 70px;
-            max-width: 180px;
+            max-height: 80px;
+            max-width: 190px;
+            object-fit: contain;
+        }
+        .orc-logo-placeholder {
+            width: 100px; height: 60px;
+            background: #f0f0f0;
+            border: 1px dashed #bbb;
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: #aaa;
         }
 
-        .orc-empresa-nome { text-align: right; }
-
+        .orc-empresa-nome {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+        }
         .orc-empresa-nome .nome-grande {
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 900;
             color: var(--cor-orcamento);
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             line-height: 1;
-        }
-
-        .orc-empresa-nome .subtitulo {
-            font-size: 13px;
-            color: #555;
-            letter-spacing: 3px;
             text-transform: uppercase;
         }
+        .orc-empresa-nome .subtitulo {
+            font-size: 12px;
+            color: #555;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: 3px;
+            font-weight: 400;
+        }
 
+        /* ── PARÁGRAFO INTRODUTÓRIO ── */
         .orc-intro {
             text-align: justify;
-            margin-bottom: 10px;
-            font-size: 12px;
-            line-height: 1.6;
+            margin-bottom: 14px;
+            font-size: 13px;
+            line-height: 1.7;
             color: #333;
         }
 
-        .orc-solicitante { 
-            margin-bottom: 10px; font-size: 12px;
-            border-left: 4px solid var(--cor-orcamento);
-            padding: 6px 10px;
-            background: #f4f7fc;
-            border-radius: 0 4px 4px 0;
+        /* ── BLOCO SOLICITANTE: texto simples, sem fundo ── */
+        .orc-solicitante {
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.6;
         }
-        .orc-solicitante p { margin: 2px 0; }
+        .orc-solicitante p { margin: 0; }
 
-        .orc-table-wrapper { border: 1px solid #333; margin-bottom: 10px; }
+        /* ── TABELA DE ORÇAMENTO ── */
+        .orc-table-wrapper {
+            border: 1px solid #bbb;
+            margin-bottom: 16px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
 
         .orc-table-title {
             background-color: var(--cor-orcamento);
             color: #fff;
             text-align: center;
             font-weight: bold;
-            font-size: 14px;
-            letter-spacing: 2px;
-            padding: 10px;
+            font-size: 13px;
+            letter-spacing: 4px;
+            padding: 10px 12px;
+            text-transform: uppercase;
         }
 
-        .orc-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .orc-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
         .orc-table thead tr { background-color: #fff; }
-        .orc-table th { border: 1px solid #ccc; padding: 8px 10px; font-size: 12px; font-weight: bold; color: #222; text-align: left; word-wrap: break-word; overflow-wrap: break-word; }
-        .orc-table th.col-img { width: 65px; text-align: center; }
-        .orc-table th.col-garantia { width: 85px; text-align: center; }
-        .orc-table th.col-valor { width: 110px; text-align: right; }
-        .orc-table td { border: 1px solid #ddd; padding: 9px 10px; vertical-align: middle; font-size: 12px; word-wrap: break-word; overflow-wrap: break-word; }
-        .orc-table td.col-img { text-align: center; width: 65px; }
-        .orc-table td.col-img img { max-width: 55px; max-height: 50px; object-fit: contain; }
-        .orc-table td.col-garantia { text-align: center; width: 85px; }
-        .orc-table td.col-valor { text-align: right; font-weight: bold; width: 110px; }
+        .orc-table th {
+            border: 1px solid #ccc;
+            padding: 9px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #222;
+            text-align: left;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .orc-table th.col-img  { width: 70px; text-align: center; border-left: none; }
+        .orc-table th.col-garantia { width: 90px; text-align: center; }
+        .orc-table th.col-valor    { width: 120px; text-align: right; }
 
+        .orc-table td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            vertical-align: middle;
+            font-size: 12.5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .orc-table td.col-img  { text-align: center; width: 70px; border-left: none; padding: 8px 6px; }
+        .orc-table td.col-img img { max-width: 58px; max-height: 54px; object-fit: contain; }
+        .orc-table td.col-img .sem-foto {
+            width: 58px; height: 48px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; color: #bbb;
+            margin: 0 auto;
+        }
+        .orc-table td.col-garantia { text-align: center; width: 90px; }
+        .orc-table td.col-valor    { text-align: right; font-weight: bold; width: 120px; }
+
+        /* linha de total — fundo cinza claro, texto escuro, bold */
         .orc-table .row-total td {
-            background-color: var(--cor-orcamento);
-            color: #fff;
+            background-color: #f0f0f0;
+            color: #222;
             font-weight: bold;
             text-align: center;
             font-size: 13px;
-            border-top: 2px solid #0d2145;
-            padding: 10px;
+            border-top: 2px solid #bbb;
+            padding: 11px 12px;
         }
 
-        .orc-obs { 
-            font-size: 11px; margin-bottom: 8px; line-height: 1.5; 
-            word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap;
-            border-left: 4px solid #c97d00;
-            padding-left: 10px;
-            background: #fffbf0;
+        /* ── OBSERVAÇÃO ── */
+        .orc-obs {
+            font-size: 12.5px;
+            margin-bottom: 14px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            color: #222;
         }
-        .orc-pagamento { 
-            font-size: 11px; margin-bottom: 14px; line-height: 1.7; 
-            word-wrap: break-word; overflow-wrap: break-word;
-            border-left: 4px solid var(--cor-orcamento);
-            padding: 6px 10px;
-            background: #f4f7fc;
-            border-radius: 0 4px 4px 0;
+        .orc-obs strong { font-weight: bold; }
+
+        /* ── CONDIÇÕES DE PAGAMENTO ── */
+        .orc-pagamento {
+            font-size: 12.5px;
+            margin-bottom: 18px;
+            line-height: 1.8;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            color: #222;
         }
-        .orc-pagamento strong { font-weight: bold; display: block; margin-bottom: 2px; color: var(--cor-orcamento); }
-        .orc-footer-loc { text-align: right; font-size: 11px; margin-bottom: 20px; }
-        .orc-assinatura { margin-top: 6px; }
-        .orc-assinatura p { font-size: 11px; margin: 2px 0; }
-        .orc-assinatura .linha-ass { border-top: 1px solid #333; width: 220px; margin: 22px 0 4px 0; }
+        .orc-pagamento strong {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 2px;
+            color: #222;
+        }
+
+        /* ── LOCALIDADE / DATA ── */
+        .orc-footer-loc {
+            text-align: right;
+            font-size: 12.5px;
+            margin-bottom: 26px;
+            color: #333;
+        }
+
+        /* ── ASSINATURA ── */
+        .orc-assinatura { margin-top: 4px; }
+        .orc-assinatura > p.atenc {
+            font-size: 12.5px;
+            margin-bottom: 4px;
+            color: #333;
+        }
+        /* linha de assinatura — idêntica ao ref */
+        .orc-assinatura .linha-ass {
+            border-top: 1.5px solid #444;
+            width: 260px;
+            margin: 28px 0 5px 0;
+        }
+        .orc-assinatura .ass-nome {
+            font-size: 12.5px;
+            font-weight: bold;
+            color: #222;
+            margin: 0;
+        }
+        .orc-assinatura .ass-cargo {
+            font-size: 12px;
+            color: #444;
+            margin: 1px 0 0 0;
+        }
 
         /* Modal orcamento form */
         .orcamento-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -1829,102 +1935,121 @@ function gerarHTMLOrcamento(orc) {
     const totalFormatado = formatarMoeda(total);
     const totalExtenso = valorExtenso(total);
 
+    // ── Logo ──────────────────────────────────────────
     const logoHtml = empresaConfig.logo
         ? `<img src="${empresaConfig.logo}" alt="Logo">`
-        : `<div style="font-size:11px;color:#999;">(Logo não configurada)</div>`;
+        : `<div class="orc-logo-placeholder">Logo</div>`;
 
+    // ── Imagem de fundo opcional ──────────────────────
     const bgHtml = empresaConfig.background
         ? `<img class="orc-bg-img" src="${empresaConfig.background}" alt="">`
         : '';
 
-        const itensHTML = orc.itens.map(item => {
+    // ── Linhas de itens ───────────────────────────────
+    const itensHTML = orc.itens.map(item => {
         const fotoCell = item.foto
-            ? `<img src="${item.foto}" style="max-width:55px;max-height:50px;object-fit:contain;">`
-            : `<div style="width:55px;height:40px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#bbb;">sem foto</div>`;
-        const valorCell = item.valor || 'Não cobramos';
+            ? `<img src="${item.foto}" style="max-width:58px;max-height:54px;object-fit:contain;">`
+            : `<div class="sem-foto">sem foto</div>`;
+        const valorCell = item.valor ? item.valor : 'Não cobramos';
         return `
             <tr>
                 <td class="col-img">${fotoCell}</td>
                 <td style="white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;">${item.descricao}</td>
-                <td class="col-garantia">${item.garantia}</td>
+                <td class="col-garantia">${item.garantia || ''}</td>
                 <td class="col-valor">${valorCell}</td>
             </tr>`;
     }).join('');
 
-    const pixInfo = orc.chavePix || empresaConfig.pix || empresaConfig.cnpj;
+    // ── Dados auxiliares ──────────────────────────────
+    const pixInfo   = orc.chavePix || empresaConfig.pix || empresaConfig.cnpj || '';
     const pagamento = orc.pagamento || 'transferência ou Pix';
-    const nomeEmp = empresaConfig.nomeEmpresa || 'Empresa';
-    const cidade = orc.cidade || 'Maceió (AL)';
-    const dataExtensoStr = dataExtenso(orc.data);
+    const nomeEmp   = empresaConfig.nomeEmpresa || 'Empresa';
+    const cidade    = orc.cidade || 'Maceió (AL)';
+    const dataStr   = dataExtenso(orc.data);
+
+    // ── Bloco solicitante (só mostra campos preenchidos) ──
+    const solicitanteLinhas = [
+        orc.empresa         ? `<p><strong>Empresa/Solicitante:</strong> ${orc.empresa}</p>` : '',
+        orc.cnpjSolicitante ? `<p><strong>CNPJ:</strong> ${orc.cnpjSolicitante}</p>` : '',
+        orc.veiculo         ? `<p><strong>Veículo:</strong> ${orc.veiculo}</p>` : '',
+        orc.placa           ? `<p><strong>Placa:</strong> ${orc.placa}</p>` : '',
+        orc.pelicula        ? `<p><strong>Película:</strong> ${orc.pelicula}</p>` : '',
+    ].filter(Boolean).join('');
+
+    // ── Assinatura ────────────────────────────────────
+    const assHTML = (empresaConfig.responsavel || empresaConfig.cargo) ? `
+        <p class="atenc">Atenciosamente,</p>
+        <div class="linha-ass"></div>
+        ${empresaConfig.responsavel ? `<p class="ass-nome">${empresaConfig.responsavel}</p>` : ''}
+        ${empresaConfig.cargo       ? `<p class="ass-cargo">${empresaConfig.cargo}</p>`       : ''}
+    ` : `<p class="atenc">Atenciosamente,</p><div class="linha-ass"></div>`;
 
     return `
     <div id="orcamento-preview">
         ${bgHtml}
         <div class="orc-inner">
-        <div class="orc-header">
-            <div class="orc-logo-area">${logoHtml}</div>
-            <div class="orc-empresa-nome">
-                <div class="nome-grande">${nomeEmp.toUpperCase()}</div>
-                <div class="subtitulo">Equipadora</div>
-                <div style="font-size:11px;color:#888;margin-top:2px;">Orçamento Nº ${orc.id || '---'}</div>
+
+            <!-- CABEÇALHO -->
+            <div class="orc-header">
+                <div class="orc-logo-area">${logoHtml}</div>
+                <div class="orc-empresa-nome">
+                    <span class="nome-grande">${nomeEmp.toUpperCase()}</span>
+                    <span class="subtitulo">Equipadora</span>
+                </div>
             </div>
-        </div>
 
-        <p class="orc-intro">
-            A empresa ${nomeEmp}, com sede na ${empresaConfig.endereco}, inscrita no CNPJ sob o nº ${empresaConfig.cnpj},
-            envia o presente orçamento, com validade de até ${orc.validade || 30} dias.
-        </p>
+            <!-- INTRO -->
+            <p class="orc-intro">
+                &nbsp;&nbsp;&nbsp;&nbsp;A empresa ${nomeEmp}, com sede na ${empresaConfig.endereco},
+                inscrita no CNPJ sob o nº ${empresaConfig.cnpj},
+                envia o presente orçamento, com validade de até ${orc.validade || 30} dias.
+            </p>
 
-        <div class="orc-solicitante">
-            <p><strong>Empresa/Solicitante:</strong> ${orc.empresa}</p>
-            ${orc.cnpjSolicitante ? `<p><strong>CNPJ:</strong> ${orc.cnpjSolicitante}</p>` : ''}
-            ${orc.veiculo ? `<p><strong>Veículo:</strong> ${orc.veiculo}</p>` : ''}
-            ${orc.placa ? `<p><strong>Placa:</strong> ${orc.placa}</p>` : ''}
-            ${orc.pelicula ? `<p><strong>Película:</strong> ${orc.pelicula}</p>` : ''}
-        </div>
+            <!-- SOLICITANTE -->
+            <div class="orc-solicitante">${solicitanteLinhas}</div>
 
-        <div class="orc-table-wrapper">
-            <div class="orc-table-title">ORÇAMENTO</div>
-            <table class="orc-table">
-                <thead>
-                    <tr>
-                        <th class="col-img"></th>
-                        <th>Descrição dos produtos e serviços</th>
-                        <th class="col-garantia">Garantia</th>
-                        <th class="col-valor">Valor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${itensHTML}
-                    <tr class="row-total">
-                        <td colspan="4" style="word-wrap:break-word;overflow-wrap:break-word;">
-                            Total: ${totalFormatado} (${totalExtenso})
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            <!-- TABELA -->
+            <div class="orc-table-wrapper">
+                <div class="orc-table-title">O R Ç A M E N T O</div>
+                <table class="orc-table">
+                    <thead>
+                        <tr>
+                            <th class="col-img"></th>
+                            <th>Descrição dos produtos e serviços</th>
+                            <th class="col-garantia">Garantia</th>
+                            <th class="col-valor">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itensHTML}
+                        <tr class="row-total">
+                            <td colspan="4" style="word-wrap:break-word;overflow-wrap:break-word;">
+                                <strong>Total: ${totalFormatado} (${totalExtenso})</strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-        ${orc.obs ? `<p class="orc-obs"><strong>Observação:</strong> ${orc.obs}</p>` : ''}
+            <!-- OBSERVAÇÃO -->
+            ${orc.obs ? `<p class="orc-obs"><strong>Observação:</strong> ${orc.obs}</p>` : ''}
 
-        <div class="orc-pagamento">
-            <strong>Condições de pagamento:</strong>
-            Forma de pagamento: ${pagamento}<br>
-            ${pixInfo ? `Chave-pix (CNPJ): ${pixInfo}` : ''}
-        </div>
+            <!-- PAGAMENTO -->
+            <div class="orc-pagamento">
+                <strong>Condições de pagamento:</strong>
+                Forma de pagamento: ${pagamento}<br>
+                ${pixInfo ? `Chave-pix (CNPJ): ${pixInfo}` : ''}
+            </div>
 
-        <p class="orc-footer-loc">${cidade}, ${dataExtensoStr}.</p>
+            <!-- LOCALIDADE / DATA -->
+            <p class="orc-footer-loc">${cidade}, ${dataStr}.</p>
 
-        <div class="orc-assinatura">
-            <p>Atenciosamente,</p>
-            <div class="linha-ass"></div>
-            ${empresaConfig.responsavel ? `<p><strong>${empresaConfig.responsavel}</strong></p>` : ''}
-            ${empresaConfig.cargo ? `<p>${empresaConfig.cargo}</p>` : ''}
-        </div>
+            <!-- ASSINATURA -->
+            <div class="orc-assinatura">${assHTML}</div>
+
         </div>
     </div>`;
 }
-
 function renderizarOrcamentos() {
     tabelaOrcamentosBody.innerHTML = '';
     let total = 0;
